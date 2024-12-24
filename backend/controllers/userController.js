@@ -10,6 +10,7 @@ const userController = {
             res.status(500).json(err);
         }
     },
+    
     //DELETE USER
     deleteUser: async(req,res)=>{
         try{
