@@ -65,14 +65,14 @@ const authController = {
         const accessToken = authController.generateAccessToken(user);
         const refreshToken = authController.generateRefreshToken(user);
         refreshTokens.push(refreshToken);
-        res.cookie("refreshToken", refreshToken, {
-          httpOnly: true,
-          secure: false,
-          path: "/",
-          sameSite: "strict",
-        });
+        // res.cookie("refreshToken", refreshToken, {
+        //   httpOnly: true,
+        //   secure: false,
+        //   path: "/",
+        //   sameSite: "strict",
+        // });
         const { password, ...others } = user._doc;
-        res.status(200).json({ ...others, accessToken });
+        res.status(200).json({ ...others, accessToken, refreshToken });
       }
     } catch (err) {
       console.log(err);
@@ -83,7 +83,7 @@ const authController = {
 
   requestRefreshToken: async (req, res) => {
     //Take the refresh token from user
-    const refreshToken = req.cookies.refreshToken;
+    const refreshToken = req.body.refreshToken;
     if (!refreshToken) return res.status(401).json("You're not authentication");
     if (!refreshTokens.includes(refreshToken)) {
       return res.status(403).json("Refresh token is not valid");
@@ -97,19 +97,21 @@ const authController = {
       const newAccessToken = authController.generateAccessToken(user);
       const newRefreshToken = authController.generateRefreshToken(user);
       refreshTokens.push(newRefreshToken);
-      res.cookie("refreshToken", newRefreshToken, {
-        httpOnly: true,
-        secure: false,
-        path: "/",
-        sameSite: "strict",
-      });
-      res.status(200).json({ accessToken: newAccessToken });
+      // res.cookie("refreshToken", newRefreshToken, {
+      //   httpOnly: true,
+      //   secure: false,
+      //   path: "/",
+      //   sameSite: "strict",
+      // });
+      res
+        .status(200)
+        .json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
     });
   },
 
   //LOGOUT
   userLogout: async (req, res) => {
-    res.clearCookie("refreshToken");
+    // res.clearCookie("refreshToken");
     refreshTokens = refreshTokens.filter(
       (token) => token !== req.cookies.refreshToken
     );
