@@ -10,13 +10,47 @@ const Login = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
         const newUser = {
             username: username,
             password: password,
         };
-        loginUser(newUser, dispatch, navigate);
+        // 
+        try {
+            const response = await loginUser(newUser, dispatch, navigate);
+
+            if (response && response.role) {
+                const { role } = response;
+
+                // Điều hướng dựa trên role
+                switch (role) {
+                    case "admin":
+                        navigate("/admin-dashboard");
+                        break;
+                    case "player":
+                        navigate("/player-dashboard");
+                        break;
+                    case "sponsor":
+                        navigate("/sponsor-dashboard");
+                        break;
+                    case "organizer":
+                        navigate("/organizer-dashboard");
+                        break;
+                    case "referee":
+                        navigate("/referee-dashboard");
+                        break;
+                    default:
+                        navigate("/user-dashboard");
+                        break;
+                }
+            } else {
+                alert("Login failed: Unable to determine role.");
+            }
+        } catch (error) {
+            console.error("Login error:", error);
+            alert("Login failed: " + error.message);
+        }
     }
     return ( 
         <section className="login-container">

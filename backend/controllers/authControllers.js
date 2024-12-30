@@ -28,6 +28,7 @@ const authController = {
       {
         id: user.id,
         admin: user.admin,
+        role: user.role,
       },
       process.env.JWT_ACCESS_KEY,
       { expiresIn: "30m" }
@@ -39,6 +40,7 @@ const authController = {
       {
         id: user.id,
         admin: user.admin,
+        role: user.role,
       },
       process.env.JWT_REFRESH_KEY,
       { expiresIn: "365d" }
@@ -76,7 +78,6 @@ const authController = {
       }
     } catch (err) {
       console.log(err);
-
       res.status(500).json(err);
     }
   },

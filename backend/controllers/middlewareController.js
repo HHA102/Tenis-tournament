@@ -27,6 +27,14 @@ const middlewareController = {
       }
     });
   },
+
+  verifyRoles: (req, res, next) => {
+    const userRoles = req.user.roles;
+    if (!requiredRoles.some((role) => userRoles.includes(role))) {
+      return res.status(403).json({ message: "Access Denied" });
+    }
+    next();
+  },
 };
 
 module.exports = middlewareController;
