@@ -14,6 +14,7 @@ const authController = {
         username: req.body.username,
         email: req.body.email,
         password: hashed,
+        role: req.body.role ?? "user",
       });
       //save to database
       const user = await newUser.save();
@@ -31,7 +32,7 @@ const authController = {
         role: user.role,
       },
       process.env.JWT_ACCESS_KEY,
-      { expiresIn: "30m" }
+      { expiresIn: "10s" }
     );
   },
   //GENERATE REFRESH TOKEN

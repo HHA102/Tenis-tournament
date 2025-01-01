@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { ROLE } = require("../constants/index");
 
 const userSchema = new mongoose.Schema(
   {
@@ -24,8 +25,15 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: [String],
-      enum: ["user", "player", "sponsor", "organizer", "referee", "admin"], // Giới hạn các giá trị có thể
-      default: "user",
+      enum: [
+        ROLE.USER,
+        ROLE.PLAYER,
+        ROLE.SPONSOR,
+        ROLE.ORGANIZER,
+        ROLE.REFEREE,
+        ROLE.ADMIN,
+      ], // Giới hạn các giá trị có thể
+      default: ROLE.USER,
     },
   },
   { timestamps: true }

@@ -5,12 +5,12 @@ import Login from "./Components/Login/Login";
 import Register from "./Components/Register/Register";
 import NavBar from "./Components/NavBar/NavBar";
 import { useState } from "react";
-import { AdminDashboard } from "./Components/Dashboard/AdminDashboard";
-import { PlayerDashboard } from "./Components/Dashboard/PlayerDashboard";
-import { UserDashboard } from "./Components/Dashboard/UserDashboard";
-import { SponsorDashboard } from "./Components/Dashboard/SponsorDashboard";
-import { OrganizerDashboard } from "./Components/Dashboard/OrganizerDashboard";
-import { RefereeDashboard } from "./Components/Dashboard/RefereeDashboard";
+import AdminDashboard from "./Components/Dashboard/AdminDashboard";
+import PlayerDashboard from "./Components/Dashboard/PlayerDashboard";
+import UserDashboard from "./Components/Dashboard/UserDashboard";
+import SponsorDashboard from "./Components/Dashboard/SponsorDashboard";
+import OrganizerDashboard from "./Components/Dashboard/OrganizerDashboard";
+import RefereeDashboard from "./Components/Dashboard/RefereeDashboard";
 function App() {
   return (
     <Router>
