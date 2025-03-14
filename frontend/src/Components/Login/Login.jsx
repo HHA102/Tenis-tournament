@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { loginUser } from "../../redux/apiRequest";
 import { useDispatch } from "react-redux";
+import TennisImage from '../../assets/background- login.jpg';
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -19,6 +20,11 @@ const Login = () => {
     //
     try {
       const response = await loginUser(newUser, dispatch, navigate);
+
+      console.log('response', response);
+      if (response?.accessToken) {
+        localStorage.setItem('token', response?.accessToken)
+      }
 
       if (response && response.role) {
         const { role } = response;
@@ -53,34 +59,8 @@ const Login = () => {
     }
   };
   return (
-    //     <section className="login-container">
-    //       <div className="login-title"> Log in</div>
-    //       <form onSubmit={handleLogin}>
-    //         <label>USERNAME</label>
-    //         <input
-    //           type="text"
-    //           placeholder="Enter your username"
-    //           // value={username}
-    //           onChange={(e) => setUsername(e.target.value)}
-    //         />
-    //         <label>PASSWORD</label>
-    //         <input
-    //           type="password"
-    //           placeholder="Enter your password"
-    //           // value={password}
-    //           onChange={(e) => setPassword(e.target.value)}
-    //         />
-    //         <button type="submit"> Continue </button>
-    //       </form>
-    //       <div className="login-register"> Don't have an account yet? </div>
-    //       <Link className="login-register-link" to="/register">
-    //         Register one for free{" "}
-    //       </Link>
-    //     </section>
-    //   );
-    // };
-
-    <div className="login-page">
+    <div className="login-page" style={{ backgroundImage: `url(${TennisImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+    
       <div className="login-container">
         <h2 className="login-title">Log in</h2>
         <form className="login-form" onSubmit={handleLogin}>

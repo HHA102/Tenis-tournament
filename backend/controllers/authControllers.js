@@ -32,7 +32,7 @@ const authController = {
         role: user.role,
       },
       process.env.JWT_ACCESS_KEY,
-      { expiresIn: "10s" }
+      { expiresIn: "2h" }
     );
   },
   //GENERATE REFRESH TOKEN

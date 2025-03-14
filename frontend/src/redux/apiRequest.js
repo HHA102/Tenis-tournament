@@ -76,7 +76,7 @@ export const deleteUser = async (accessToken, dispatch, id, axiosJWT) => {
 export const logOut = async (dispatch, id, navigate, accessToken, axiosJWT) => {
   dispatch(logOutStart());
   try {
-    await axiosJWT.post(`${process.env.REACT_APP_API_URL}/v1/auth/logout`, id, {
+    await axios.post(`${process.env.REACT_APP_API_URL}/v1/auth/logout`, id, {
       headers: { token: `Bearer ${accessToken}` },
     });
     dispatch(logOutSuccess());

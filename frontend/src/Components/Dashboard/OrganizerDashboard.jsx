@@ -1,112 +1,249 @@
+// import React, { useState, useEffect } from "react";
+// import axios from "axios";
+
+// const OrganizerDashboard = () => {
+//   const [tournamentName, setTournamentName] = useState("");
+//   const [stadium, setStadium] = useState("");
+//   const [players, setPlayers] = useState([]);
+//   const [groups, setGroups] = useState([]);
+//   const [groupSize, setGroupSize] = useState(4); // Default group size
+
+//   // Fetch list of players
+//   useEffect(() => {
+//     const fetchPlayers = async () => {
+//       try {
+//         const token = localStorage.getItem("token");
+//         const response = await axios.get("/api/players", {
+//           headers: { Authorization: `Bearer ${token}` },
+//         });
+//         setPlayers(response.data);
+//       } catch (error) {
+//         console.error("Error fetching players:", error);
+//       }
+//     };
+
+//     fetchPlayers();
+//   }, []);
+
+//   // Handle creating a new tournament
+//   const handleAddTournament = async () => {
+//     try {
+//       const token = localStorage.getItem("token");
+//       await axios.post(
+//         "/api/tournaments",
+//         { name: tournamentName, stadium },
+//         {
+//           headers: { Authorization: `Bearer ${token}` },
+//         }
+//       );
+//       alert("Tournament added successfully!");
+//       setTournamentName("");
+//       setStadium("");
+//     } catch (error) {
+//       console.error("Error adding tournament:", error);
+//       alert("Failed to add tournament.");
+//     }
+//   };
+
+//   // Handle grouping players
+//   const handleCreateGroups = () => {
+//     if (players.length === 0) {
+//       alert("No players available for grouping.");
+//       return;
+//     }
+//     const shuffledPlayers = [...players].sort(() => Math.random() - 0.5); // Shuffle players
+//     const newGroups = [];
+//     for (let i = 0; i < shuffledPlayers.length; i += groupSize) {
+//       newGroups.push(shuffledPlayers.slice(i, i + groupSize));
+//     }
+//     setGroups(newGroups);
+//   };
+
+//   return (
+//     <div>
+//       <h1>Organizer Dashboard</h1>
+
+//       {/* Add Tournament Section */}
+//       <h2>Add New Tournament</h2>
+//       <input
+//         type="text"
+//         placeholder="Tournament Name"
+//         value={tournamentName}
+//         onChange={(e) => setTournamentName(e.target.value)}
+//       />
+//       <input
+//         type="text"
+//         placeholder="Stadium"
+//         value={stadium}
+//         onChange={(e) => setStadium(e.target.value)}
+//       />
+//       <button onClick={handleAddTournament}>Add Tournament</button>
+
+//       {/* Group Players Section */}
+//       <h2>Group Players</h2>
+//       <label>
+//         Group Size:
+//         <input
+//           type="number"
+//           value={groupSize}
+//           onChange={(e) => setGroupSize(parseInt(e.target.value) || 1)}
+//           min="1"
+//         />
+//       </label>
+//       <button onClick={handleCreateGroups}>Create Groups</button>
+
+//       {groups.length > 0 && (
+//         <div>
+//           <h3>Generated Groups</h3>
+//           {groups.map((group, index) => (
+//             <div key={index}>
+//               <h4>Group {index + 1}</h4>
+//               <ul>
+//                 {group.map((player) => (
+//                   <li key={player.id}>{player.name}</li>
+//                 ))}
+//               </ul>
+//             </div>
+//           ))}
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
+
+// export default OrganizerDashboard;
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 const OrganizerDashboard = () => {
-  const [tournamentName, setTournamentName] = useState("");
-  const [stadium, setStadium] = useState("");
-  const [players, setPlayers] = useState([]);
-  const [groups, setGroups] = useState([]);
-  const [groupSize, setGroupSize] = useState(4); // Default group size
+  const [tournaments, setTournaments] = useState([]);
+  const [form, setForm] = useState({
+    name: "",
+    stadium: "",
+    location: "",
+    startDate: "",
+    endDate: "",
+  });
+  const [editId, setEditId] = useState(null);
 
-  // Fetch list of players
+  // Fetch tournaments on load
   useEffect(() => {
-    const fetchPlayers = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const response = await axios.get("/api/players", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setPlayers(response.data);
-      } catch (error) {
-        console.error("Error fetching players:", error);
-      }
-    };
-
-    fetchPlayers();
+    fetchTournaments();
   }, []);
 
-  // Handle creating a new tournament
-  const handleAddTournament = async () => {
+  const fetchTournaments = async () => {
     try {
       const token = localStorage.getItem("token");
-      await axios.post(
-        "/api/tournaments",
-        { name: tournamentName, stadium },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      alert("Tournament added successfully!");
-      setTournamentName("");
-      setStadium("");
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/v1/tournaments`, {
+        headers: { token: `Bearer ${localStorage.getItem("token")}` },
+      });
+      setTournaments(response.data);
     } catch (error) {
-      console.error("Error adding tournament:", error);
-      alert("Failed to add tournament.");
+      console.error("Error fetching tournaments:", error);
     }
   };
 
-  // Handle grouping players
-  const handleCreateGroups = () => {
-    if (players.length === 0) {
-      alert("No players available for grouping.");
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!form.name || !form.stadium || !form.location || !form.startDate || !form.endDate) {
+      alert("Please fill in all fields!");
       return;
     }
-    const shuffledPlayers = [...players].sort(() => Math.random() - 0.5); // Shuffle players
-    const newGroups = [];
-    for (let i = 0; i < shuffledPlayers.length; i += groupSize) {
-      newGroups.push(shuffledPlayers.slice(i, i + groupSize));
+
+    try {
+      const token = localStorage.getItem("token");
+      if (editId) {
+        // Update tournament
+        await axios.put(`${process.env.REACT_APP_API_URL}/v1/tournaments/${editId}`, form, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        alert("Tournament updated successfully!");
+        setEditId(null);
+      } else {
+        // Create new tournament
+        console.log('asd', `${process.env.REACT_APP_API_URL}/v1/tournaments`);
+        
+        const res = await axios.post(`${process.env.REACT_APP_API_URL}/v1/tournaments`, form, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        console.log('res', res);
+        
+        alert("Tournament added successfully!");
+      }
+
+      fetchTournaments();
+      setForm({ name: "", stadium: "", location: "", startDate: "", endDate: "" });
+    } catch (error) {
+      console.error("Error saving tournament:", error);
+      alert("Failed to save tournament.");
     }
-    setGroups(newGroups);
+  };
+
+  const handleEdit = (tournament) => {
+    setEditId(tournament._id);
+    setForm(tournament);
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this tournament?")) {
+      try {
+        const token = localStorage.getItem("token");
+        await axios.delete(`${process.env.REACT_APP_API_URL}/v1/tournaments/${id}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        alert("Tournament deleted successfully!");
+        fetchTournaments();
+      } catch (error) {
+        console.error("Error deleting tournament:", error);
+        alert("Failed to delete tournament.");
+      }
+    }
   };
 
   return (
-    <div>
-      <h1>Organizer Dashboard</h1>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">Organizer Dashboard</h1>
 
-      {/* Add Tournament Section */}
-      <h2>Add New Tournament</h2>
-      <input
-        type="text"
-        placeholder="Tournament Name"
-        value={tournamentName}
-        onChange={(e) => setTournamentName(e.target.value)}
-      />
-      <input
-        type="text"
-        placeholder="Stadium"
-        value={stadium}
-        onChange={(e) => setStadium(e.target.value)}
-      />
-      <button onClick={handleAddTournament}>Add Tournament</button>
+      {/* Add Tournament Form */}
+      <div className="bg-white p-4 shadow-md rounded-lg mb-6">
+        <h2 className="text-xl font-semibold mb-3">{editId ? "Edit Tournament" : "Add New Tournament"}</h2>
+        <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
+          <input type="text" name="name" placeholder="Tournament Name" value={form.name} onChange={handleChange} className="p-2 border rounded" />
+          <input type="text" name="stadium" placeholder="Stadium" value={form.stadium} onChange={handleChange} className="p-2 border rounded" />
+          <input type="text" name="location" placeholder="Location" value={form.location} onChange={handleChange} className="p-2 border rounded" />
+          <input type="date" name="startDate" value={form.startDate} onChange={handleChange} className="p-2 border rounded" />
+          <input type="date" name="endDate" value={form.endDate} onChange={handleChange} className="p-2 border rounded" />
+          <button type="submit" className="col-span-2 bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
+            {editId ? "Update Tournament" : "Add Tournament"}
+          </button>
+        </form>
+      </div>
 
-      {/* Group Players Section */}
-      <h2>Group Players</h2>
-      <label>
-        Group Size:
-        <input
-          type="number"
-          value={groupSize}
-          onChange={(e) => setGroupSize(parseInt(e.target.value) || 1)}
-          min="1"
-        />
-      </label>
-      <button onClick={handleCreateGroups}>Create Groups</button>
-
-      {groups.length > 0 && (
-        <div>
-          <h3>Generated Groups</h3>
-          {groups.map((group, index) => (
-            <div key={index}>
-              <h4>Group {index + 1}</h4>
-              <ul>
-                {group.map((player) => (
-                  <li key={player.id}>{player.name}</li>
-                ))}
-              </ul>
+      {/* Tournament List */}
+      <h2 className="text-xl font-semibold mb-3">Tournaments</h2>
+      <div className="grid grid-cols-3 gap-4">
+        {tournaments.map((tournament) => (
+          <div key={tournament._id} className="bg-white p-4 shadow-md rounded-lg">
+            <h3 className="text-lg font-bold">{tournament.name}</h3>
+            <p><strong>Stadium:</strong> {tournament.stadium}</p>
+            <p><strong>Location:</strong> {tournament.location}</p>
+            <p><strong>Start:</strong> {new Date(tournament.startDate).toLocaleDateString()}</p>
+            <p><strong>End:</strong> {new Date(tournament.endDate).toLocaleDateString()}</p>
+            <div className="mt-2">
+              <button onClick={() => handleEdit(tournament)} className="bg-yellow-500 text-white px-3 py-1 rounded mr-2 hover:bg-yellow-600">
+                Edit
+              </button>
+              <button onClick={() => handleDelete(tournament._id)} className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
+                Delete
+              </button>
             </div>
-          ))}
-        </div>
-      )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
