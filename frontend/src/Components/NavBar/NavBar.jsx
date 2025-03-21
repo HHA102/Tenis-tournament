@@ -65,31 +65,33 @@ const NavBar = () => {
     //   )}
     // </nav>
     <nav className="navbar-container">
-      {/* Logo nằm bên trái */}
-      <div className="navbar-logo">Tennis Tournament</div>
+      {/* Logo on the left */}
+      <div className="navbar-logo">
+        🎾 Tennis Tournament
+      </div>
 
-      {/* Menu nằm bên phải */}
+      {/* Menu on the right */}
       <div className="navbar-menu">
-        <Link to={getHomeLink()} className="navbar-home">
+        <Link to={getHomeLink()} className="navbar-link">
           Home
         </Link>
 
-        {/* Kiểm tra nếu đã đăng nhập */}
+        {/* If logged in */}
         {user ? (
           <>
             <p className="navbar-user">
-              Hi, <span>{user.username}</span>
+              👋 Hi, <span className="navbar-username">{user.username}</span>
             </p>
-            <Link to="/logout" className="navbar-logout" onClick={handleLogout}>
+            <Link to="/logout" className="navbar-button" onClick={handleLogout}>
               Log out
             </Link>
           </>
         ) : (
           <>
-            <Link to="/login" className="navbar-login">
+            <Link to="/login" className="navbar-button">
               Login
             </Link>
-            <Link to="/register" className="navbar-register">
+            <Link to="/register" className="navbar-button register">
               Register
             </Link>
           </>
