@@ -21,11 +21,6 @@ const Login = () => {
     try {
       const response = await loginUser(newUser, dispatch, navigate);
 
-      console.log('response', response);
-      if (response?.accessToken) {
-        localStorage.setItem('token', response?.accessToken)
-      }
-
       if (response && response.role) {
         const { role } = response;
 
@@ -60,7 +55,7 @@ const Login = () => {
   };
   return (
     <div className="login-page" style={{ backgroundImage: `url(${TennisImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
-    
+
       <div className="login-container">
         <h2 className="login-title">Log in</h2>
         <form className="login-form" onSubmit={handleLogin}>

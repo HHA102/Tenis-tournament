@@ -1,6 +1,6 @@
 import axios from "axios";
 import jwt_decode from "jwt-decode";
-
+import { store } from './redux/store'
 const refreshToken = async () => {
   try {
     const res = await axios.post(
@@ -17,10 +17,11 @@ const refreshToken = async () => {
 
 export const createAxios = (user, dispatch, stateSuccess) => {
   const newInstance = axios.create();
+  const accessToken = store.getState()?.auth?.login?.accessToken;
   newInstance.interceptors.request.use(
     async (config) => {
       let date = new Date();
-      const decodedToken = jwt_decode(user?.accessToken);
+      const decodedToken = jwt_decode(accessToken);
       if (decodedToken.exp < date.getTime() / 1000) {
         const data = await refreshToken();
         const refreshUser = {

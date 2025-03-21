@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { loginSuccess } from "../../redux/authSlice";
 import { createAxios } from "../../createInstance";
 import "./AdminDashboard.css";
+import axiosClient from "../../utils/axiosClient";
 
 const AdminDashboard = () => {
   const [newUser, setNewUser] = useState({
@@ -29,8 +30,8 @@ const AdminDashboard = () => {
   useEffect(() => {
     if (!user) {
       navigate("/login");
-    } else if (user?.accessToken) {
-      getAllUsers(user?.accessToken, dispatch, axiosJWT);
+    } else {
+      getAllUsers(dispatch);
     }
   }, []);
 
@@ -38,17 +39,14 @@ const AdminDashboard = () => {
   const handleCreateUser = async () => {
     try {
       const roleToSave = newUser.role || ROLE.USER;
-      await axios.post(
-        `${process.env.REACT_APP_API_URL}/v1/auth/register`,
-        { ...newUser, role: roleToSave },
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
+      await axiosClient.post(
+        '/v1/auth/register',
+        { ...newUser, role: roleToSave }
       );
       alert("User created successfully!");
       setNewUser({ username: "", password: "", email: "", role: ROLE.USER });
       // Refresh danh sách người dùng sau khi thêm mới
-      getAllUsers(user?.accessToken, dispatch, axiosJWT);
+      getAllUsers();
     } catch (error) {
       console.error("Error creating user:", error);
       alert("Failed to create user.");
@@ -58,9 +56,9 @@ const AdminDashboard = () => {
   // Handle xóa người dùng
   const handleDeleteUser = async (userId) => {
     try {
-      await deleteUser(user?.accessToken, dispatch, userId, axiosJWT);
+      await deleteUser(userId);
       alert("User deleted successfully!");
-      getAllUsers(user?.accessToken, dispatch, axiosJWT);
+      getAllUsers();
     } catch (error) {
       console.error("Error deleting user:", error);
       alert("Failed to delete user.");
@@ -70,16 +68,13 @@ const AdminDashboard = () => {
   // Handle cập nhật vai trò người dùng
   const handleUpdateRole = async (userId, role) => {
     try {
-      await axios.put(
+      await axiosClient.put(
         `/v1/user/${userId}`,
         { role },
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
       );
       alert("Role updated successfully!");
       // Cập nhật vai trò trong danh sách
-      getAllUsers(user?.accessToken, dispatch, axiosJWT);
+      getAllUsers();
     } catch (error) {
       console.error("Error updating role:", error);
       alert("Failed to update role.");

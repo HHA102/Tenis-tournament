@@ -23,6 +23,12 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    refreshTokens: [
+      {
+        token: { type: String, required: true },
+        expiresAt: { type: Date, required: true },
+      }
+    ],
     role: {
       type: [String],
       enum: [
