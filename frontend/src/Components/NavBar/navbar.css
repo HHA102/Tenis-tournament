@@ -28,40 +28,84 @@
     justify-content: space-between; /* Logo bên trái, menu bên phải */
     align-items: center;
     padding: 1rem 1.5rem;
-    background-color: rgb(223, 223, 223);
+    background: linear-gradient(90deg, #1e3c72 0%, #2a5298 100%);
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.3);
   }
   
-  /* Logo */
-  .navbar-logo {
-    font-size: 2rem;
-    font-weight: bold;
-    color: rgb(0, 99, 230);
-    text-decoration: none;
-    margin-right: auto; /* Đẩy logo sang trái */
-  }
-  
-  .navbar-menu {
-    display: flex; /* Sử dụng Flexbox cho menu */
-    justify-content: space-evenly; /* Căn đều các mục menu */
-    width: 40%; /* Giới hạn không gian menu */
-    max-width: 600px; /* Menu không vượt quá chiều rộng này */
-    align-items: center; /* Căn giữa các mục menu theo trục dọc */
-  }
-  
-  .navbar-menu > *:hover {
-    color: rgb(0, 154, 165); /* Đổi màu khi hover */
-
-  }
-.navbar-home{
-    color:rgb(0, 0, 0);
-    text-decoration: none;
-    font-weight: bold;
+/* Logo */
+.navbar-logo {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #ffffff;
+  text-decoration: none;
+  margin-right: auto; /* Đẩy logo sang trái */
+  letter-spacing: 1px;
 }
+
+.navbar-menu {
+  display: flex; /* Sử dụng Flexbox cho menu */
+  justify-content: space-evenly; /* Căn đều các mục menu */
+  width: 40%; /* Giới hạn không gian menu */
+  max-width: 600px; /* Menu không vượt quá chiều rộng này */
+  align-items: center; /* Căn giữa các mục menu theo trục dọc */
+}
+
+.navbar-menu > *:hover {
+  color: rgb(0, 154, 165); /* Đổi màu khi hover */
+
+}
+
+.navbar-link {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.navbar-link:hover {
+  color: #fcd34d;
+}
+
+.navbar-home{
+  color:rgb(0, 0, 0);
+  text-decoration: none;
+  font-weight: bold;
+}
+
 .navbar-login {
     color:rgb(0, 0, 0);
     text-decoration: none;
     font-weight: bold;
 }
+
+.navbar-button {
+  padding: 8px 16px;
+  border: 2px solid #ffffff;
+  border-radius: 24px;
+  background-color: transparent;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.navbar-button:hover {
+  background-color: #ffffff;
+  color: #1e3c72;
+}
+
+.navbar-button.register {
+  border-color: #fcd34d;
+}
+
+.navbar-button.register:hover {
+  background-color: #fcd34d;
+  color: #1e3c72;
+}
+
 .navbar-register{
     color:rgb(86, 67, 255);
     background-color: rgb(37, 255, 103);
