@@ -18,6 +18,8 @@ import {
   getUsersStart,
   getUsersSuccess,
 } from "./userSlice";
+import { store } from "./store";
+import axiosClient, { saveNewAccessToken } from "../utils/axiosClient";
 //npm install axios
 
 export const loginUser = async (user, dispatch, navigate) => {
@@ -25,8 +27,11 @@ export const loginUser = async (user, dispatch, navigate) => {
   try {
     const res = await axios.post(
       `${process.env.REACT_APP_API_URL}/v1/auth/login`,
-      user
+      user, {
+      withCredentials: true
+    }
     );
+    saveNewAccessToken(res?.data?.accessToken)
     dispatch(loginSuccess(res.data));
     // navigate("/");
     return res.data;
@@ -46,42 +51,36 @@ export const registerUser = async (user, dispatch, navigate) => {
   }
 };
 
-export const getAllUsers = async (accessToken, dispatch, axiosJWT) => {
-  dispatch(getUsersStart());
+export const getAllUsers = async () => {
+  store.dispatch(getUsersStart());
   try {
-    const res = await axiosJWT.get(`${process.env.REACT_APP_API_URL}/v1/user`, {
-      headers: { token: `Bearer ${accessToken}` },
-    });
-    dispatch(getUsersSuccess(res.data));
+    const res = await axiosClient.get('/v1/user');
+    store.dispatch(getUsersSuccess(res.data));
   } catch (err) {
-    dispatch(getUsersFailed());
+    store.dispatch(getUsersFailed());
   }
 };
 
-export const deleteUser = async (accessToken, dispatch, id, axiosJWT) => {
-  dispatch(deleteUserStart());
+export const deleteUser = async (id) => {
+  store.dispatch(deleteUserStart());
   try {
-    const res = await axiosJWT.delete(
-      `${process.env.REACT_APP_API_URL}/v1/user/` + id,
-      {
-        headers: { token: `Bearer ${accessToken}` },
-      }
-    );
-    dispatch(deleteUsersSuccess(res.data));
+    const res = await axiosClient.delete(
+      `/v1/user/` + id);
+    store.dispatch(deleteUsersSuccess(res.data));
   } catch (err) {
-    dispatch(deleteUserFailed(err.response.data));
+    store.dispatch(deleteUserFailed(err.response.data));
   }
 };
 
-export const logOut = async (dispatch, id, navigate, accessToken, axiosJWT) => {
-  dispatch(logOutStart());
+export const logOut = async (navigate) => {
+  store.dispatch(logOutStart());
   try {
-    await axios.post(`${process.env.REACT_APP_API_URL}/v1/auth/logout`, id, {
-      headers: { token: `Bearer ${accessToken}` },
-    });
-    dispatch(logOutSuccess());
-    navigate("/login");
+    const res = await axiosClient.post('/v1/auth/logout');
+    if (res.data) {
+      store.dispatch(logOutSuccess());
+      navigate("/login");
+    }
   } catch (err) {
-    dispatch(logOutFailed());
+    store.dispatch(logOutFailed());
   }
 };
