@@ -43,6 +43,7 @@ const UserDashboard = () => {
   useEffect(() => {
     setTournaments(mockTournaments);
     setMatches(mockMatches);
+    // eslint-disable-next-line
   }, []);
 
   return (

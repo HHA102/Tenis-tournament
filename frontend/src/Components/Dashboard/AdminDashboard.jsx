@@ -1,13 +1,10 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { ROLE } from "../../constants";
 import { deleteUser, getAllUsers } from "../../redux/apiRequest";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { loginSuccess } from "../../redux/authSlice";
-import { createAxios } from "../../createInstance";
-import "./AdminDashboard.css";
 import axiosClient from "../../utils/axiosClient";
+import "./AdminDashboard.css";
 
 const AdminDashboard = () => {
   const [newUser, setNewUser] = useState({
@@ -18,22 +15,19 @@ const AdminDashboard = () => {
   });
 
   // Lấy danh sách người dùng từ Redux store
-  const [users, setUsers] = useState([]);
   const userList = useSelector((state) => state.users.users?.allUsers);
 
   const user = useSelector((state) => state.auth.login?.currentUser);
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  let axiosJWT = createAxios(user, dispatch, loginSuccess);
 
   // Fetch danh sách người dùng
   useEffect(() => {
     if (!user) {
       navigate("/login");
     } else {
-      getAllUsers(dispatch);
+      getAllUsers();
     }
-  }, []);
+  }, [user, navigate]);
 
   // Handle tạo người dùng mới
   const handleCreateUser = async () => {

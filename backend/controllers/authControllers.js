@@ -35,7 +35,7 @@ const authController = {
         iat: Math.floor(Date.now() / 1000),
       },
       process.env.JWT_ACCESS_KEY,
-      { expiresIn: "1m" }
+      { expiresIn: "30m" }
     );
   },
   //GENERATE REFRESH TOKEN
