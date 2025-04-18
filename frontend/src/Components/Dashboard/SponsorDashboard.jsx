@@ -58,12 +58,22 @@ const SponsorDashboard = () => {
   };
 
   return (
-    <div>
+    <div className="min-h-screen w-full bg-gradient-to-br from-blue-500 to-purple-600"
+      style={{
+      backgroundImage: `url('https://summit.pointclickcare.com/wp-content/themes/PointClickCare-theme-1.0.0/assets/images/summit-hero-background-update.png')`,
+      backgroundSize: 'cover', // Ensures the image covers the entire screen
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundAttachment: 'fixed', // Keeps the background fixed when scrolling
+      height: 'auto', // Ensures full height
+      width: '100vw', // Ensures full width
+    }}>
       <h1>Sponsor Dashboard</h1>
 
       {/* Select Venue Section */}
       <h2>Select a Venue</h2>
       <select
+        style={{margin: "auto", display: "block", marginBottom: "7px"}}
         value={selectedVenue}
         onChange={(e) => setSelectedVenue(e.target.value)}
       >
@@ -78,6 +88,7 @@ const SponsorDashboard = () => {
       {/* Select Match Section */}
       <h2>Select a Match</h2>
       <select
+        style={{margin: "auto", display: "block", marginBottom: "7px"}}
         value={selectedMatch}
         onChange={(e) => setSelectedMatch(e.target.value)}
       >
@@ -92,6 +103,7 @@ const SponsorDashboard = () => {
       {/* Confirm Sponsorship Section */}
       <h2>Confirm Sponsorship</h2>
       <button
+        style={{margin: "auto", display: "block", marginBottom: "7px"}}
         onClick={handleConfirmSponsorship}
         disabled={!selectedVenue || !selectedMatch}
       >

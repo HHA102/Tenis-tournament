@@ -65,7 +65,16 @@ const PlayerDashboard = () => {
   };
 
   return (
-    <div>
+    <div className="min-h-screen w-full bg-gradient-to-br from-blue-500 to-purple-600"
+      style={{
+      backgroundImage: `url('https://img.freepik.com/premium-vector/colorful-tennis-racket-balls-pastel-background-sport-concept_67590-2137.jpg')`,
+      backgroundSize: 'cover', // Ensures the image covers the entire screen
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundAttachment: 'fixed', // Keeps the background fixed when scrolling
+      height: 'auto', // Ensures full height
+      width: '100vw', // Ensures full width
+    }}>
       <h1>Player Dashboard</h1>
 
       {/* Player Info Section */}
@@ -100,6 +109,7 @@ const PlayerDashboard = () => {
       {/* Tournament Registration Section */}
       <h2>Register for a Tournament</h2>
       <select
+        style={{margin: "auto", display: "block", marginBottom: "7px"}}
         value={selectedTournament}
         onChange={(e) => setSelectedTournament(e.target.value)}
       >
@@ -110,7 +120,7 @@ const PlayerDashboard = () => {
           </option>
         ))}
       </select>
-      <button onClick={handleRegisterTournament} disabled={!selectedTournament}>
+      <button style={{margin: "auto", display: "block", marginBottom: "7px"}} onClick={handleRegisterTournament} disabled={!selectedTournament}>
         Register
       </button>
     </div>

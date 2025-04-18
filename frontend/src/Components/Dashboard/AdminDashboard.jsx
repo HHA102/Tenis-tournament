@@ -83,7 +83,7 @@ const AdminDashboard = () => {
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
       backgroundAttachment: 'fixed', // Keeps the background fixed when scrolling
-      height: '100vh', // Ensures full height
+      height: 'auto', // Ensures full height
       width: '100vw', // Ensures full width
     }}>
       <h1>Admin Dashboard</h1>
