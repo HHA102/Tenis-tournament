@@ -1,6 +1,8 @@
+import MenuIcon from '@mui/icons-material/Menu';
 import { useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { logOut } from "../../redux/apiRequest";
+import eventEmitter from "../../utils/eventEmitter";
 import "./navbar.css";
 const NavBar = () => {
   const user = useSelector((state) => state.auth.login.currentUser);
@@ -58,6 +60,12 @@ const NavBar = () => {
     //   )}
     // </nav>
     <nav className="navbar-container">
+      <div className="cursor-pointer" onClick={() => {
+        // send event emitter
+        eventEmitter.emit("openDrawer");
+      }}>
+        <MenuIcon htmlColor="#fff" />
+      </div>
       {/* Logo on the left */}
       <div className="navbar-logo">
         🎾 Tennis Tournament

@@ -112,8 +112,9 @@
 // };
 
 // export default OrganizerDashboard;
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useEffect, useState } from "react";
+import axiosClient from "../../utils/axiosClient";
+import TournamentItem from "./Components/TournamentItem";
 
 const OrganizerDashboard = () => {
   const [tournaments, setTournaments] = useState([]);
@@ -133,10 +134,7 @@ const OrganizerDashboard = () => {
 
   const fetchTournaments = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/v1/tournaments`, {
-        headers: { token: `Bearer ${localStorage.getItem("token")}` },
-      });
+      const response = await axiosClient.get(`/v1/tournaments`);
       setTournaments(response.data);
     } catch (error) {
       console.error("Error fetching tournaments:", error);
@@ -155,23 +153,18 @@ const OrganizerDashboard = () => {
     }
 
     try {
-      const token = localStorage.getItem("token");
       if (editId) {
         // Update tournament
-        await axios.put(`${process.env.REACT_APP_API_URL}/v1/tournaments/${editId}`, form, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await axiosClient.put(`/v1/tournaments/${editId}`, form);
         alert("Tournament updated successfully!");
         setEditId(null);
       } else {
         // Create new tournament
-        console.log('asd', `${process.env.REACT_APP_API_URL}/v1/tournaments`);
-        
-        const res = await axios.post(`${process.env.REACT_APP_API_URL}/v1/tournaments`, form, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        console.log('asd', `/v1/tournaments`);
+
+        const res = await axiosClient.post(`/v1/tournaments`, form);
         console.log('res', res);
-        
+
         alert("Tournament added successfully!");
       }
 
@@ -191,10 +184,7 @@ const OrganizerDashboard = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this tournament?")) {
       try {
-        const token = localStorage.getItem("token");
-        await axios.delete(`${process.env.REACT_APP_API_URL}/v1/tournaments/${id}`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
+        await axiosClient.delete(`/v1/tournaments/${id}`);
         alert("Tournament deleted successfully!");
         fetchTournaments();
       } catch (error) {
@@ -218,41 +208,28 @@ const OrganizerDashboard = () => {
       
       <h1 className="text-2xl font-bold mb-4">Organizer Dashboard</h1>
 
-      {/* Add Tournament Form */}
-      <div className="bg-white p-4 shadow-md rounded-lg mb-6">
-        <h2 className="text-xl font-semibold mb-3">{editId ? "Edit Tournament" : "Add New Tournament"}</h2>
-        <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
-          <input type="text" name="name" placeholder="Tournament Name" value={form.name} onChange={handleChange} className="p-2 border rounded" />
-          <input type="text" name="stadium" placeholder="Stadium" value={form.stadium} onChange={handleChange} className="p-2 border rounded" />
-          <input type="text" name="location" placeholder="Location" value={form.location} onChange={handleChange} className="p-2 border rounded" />
-          <input type="date" name="startDate" value={form.startDate} onChange={handleChange} className="p-2 border rounded" />
-          <input type="date" name="endDate" value={form.endDate} onChange={handleChange} className="p-2 border rounded" />
-          <button type="submit" className="col-span-2 bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
-            {editId ? "Update Tournament" : "Add Tournament"}
-          </button>
-        </form>
-      </div>
+        {/* Add Tournament Form */}
+        <div className="bg-white p-4 shadow-md rounded-lg mb-6">
+          <h2 className="text-xl font-semibold mb-3">{editId ? "Edit Tournament" : "Add New Tournament"}</h2>
+          <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
+            <input type="text" name="name" placeholder="Tournament Name" value={form.name} onChange={handleChange} className="p-2 border rounded" />
+            <input type="text" name="stadium" placeholder="Stadium" value={form.stadium} onChange={handleChange} className="p-2 border rounded" />
+            <input type="text" name="location" placeholder="Location" value={form.location} onChange={handleChange} className="p-2 border rounded" />
+            <input type="date" name="startDate" value={form.startDate} onChange={handleChange} className="p-2 border rounded" />
+            <input type="date" name="endDate" value={form.endDate} onChange={handleChange} className="p-2 border rounded" />
+            <button type="submit" className="col-span-2 bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
+              {editId ? "Update Tournament" : "Add Tournament"}
+            </button>
+          </form>
+        </div>
 
-      {/* Tournament List */}
-      <h2 className="text-xl font-semibold mb-3">Tournaments</h2>
-      <div className="grid grid-cols-3 gap-4">
-        {tournaments.map((tournament) => (
-          <div key={tournament._id} className="bg-white p-4 shadow-md rounded-lg">
-            <h3 className="text-lg font-bold">{tournament.name}</h3>
-            <p><strong>Stadium:</strong> {tournament.stadium}</p>
-            <p><strong>Location:</strong> {tournament.location}</p>
-            <p><strong>Start:</strong> {new Date(tournament.startDate).toLocaleDateString()}</p>
-            <p><strong>End:</strong> {new Date(tournament.endDate).toLocaleDateString()}</p>
-            <div className="mt-2">
-              <button onClick={() => handleEdit(tournament)} className="bg-yellow-500 text-white px-3 py-1 rounded mr-2 hover:bg-yellow-600">
-                Edit
-              </button>
-              <button onClick={() => handleDelete(tournament._id)} className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
+        {/* Tournament List */}
+        <h2 className="text-xl font-semibold mb-3">Tournaments</h2>
+        <div className="grid grid-cols-3 gap-4">
+          {tournaments.map((tournament) => (
+            <TournamentItem key={tournament._id} item={tournament} onEdit={handleEdit} onDelete={handleDelete} />
+          ))}
+        </div>
       </div>
     </div>
   );

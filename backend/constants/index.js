@@ -5,6 +5,7 @@ const ROLE = {
   ORGANIZER: "organizer",
   REFEREE: "referee",
   ADMIN: "admin",
+  SPECTATOR: "spectator",
 };
 
 module.exports = { ROLE };

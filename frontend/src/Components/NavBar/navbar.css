@@ -24,34 +24,42 @@
 
 /* Navbar Container */
 .navbar-container {
-    display: flex;
-    justify-content: space-between; /* Logo bên trái, menu bên phải */
-    align-items: center;
-    padding: 1rem 1.5rem;
-    background: linear-gradient(90deg, #1e3c72 0%, #2a5298 100%);
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.3);
-  }
-  
+  display: flex;
+  justify-content: space-between;
+  /* Logo bên trái, menu bên phải */
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(90deg, #1e3c72 0%, #2a5298 100%);
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.3);
+}
+
 /* Logo */
 .navbar-logo {
   font-size: 2rem;
   font-weight: bold;
   color: #ffffff;
   text-decoration: none;
-  margin-right: auto; /* Đẩy logo sang trái */
+  margin-right: auto;
+  /* Đẩy logo sang trái */
   letter-spacing: 1px;
 }
 
 .navbar-menu {
-  display: flex; /* Sử dụng Flexbox cho menu */
-  justify-content: space-evenly; /* Căn đều các mục menu */
-  width: 40%; /* Giới hạn không gian menu */
-  max-width: 600px; /* Menu không vượt quá chiều rộng này */
-  align-items: center; /* Căn giữa các mục menu theo trục dọc */
+  display: flex;
+  /* Sử dụng Flexbox cho menu */
+  justify-content: space-evenly;
+  /* Căn đều các mục menu */
+  width: 40%;
+  /* Giới hạn không gian menu */
+  max-width: 600px;
+  /* Menu không vượt quá chiều rộng này */
+  align-items: center;
+  /* Căn giữa các mục menu theo trục dọc */
 }
 
-.navbar-menu > *:hover {
-  color: rgb(0, 154, 165); /* Đổi màu khi hover */
+.navbar-menu>*:hover {
+  color: rgb(0, 154, 165);
+  /* Đổi màu khi hover */
 
 }
 
@@ -67,16 +75,16 @@
   color: #fcd34d;
 }
 
-.navbar-home{
-  color:rgb(0, 0, 0);
+.navbar-home {
+  color: rgb(0, 0, 0);
   text-decoration: none;
   font-weight: bold;
 }
 
 .navbar-login {
-    color:rgb(0, 0, 0);
-    text-decoration: none;
-    font-weight: bold;
+  color: rgb(0, 0, 0);
+  text-decoration: none;
+  font-weight: bold;
 }
 
 .navbar-button {
@@ -106,22 +114,28 @@
   color: #1e3c72;
 }
 
-.navbar-register{
-    color:rgb(86, 67, 255);
-    background-color: rgb(37, 255, 103);
-    padding:0.35rem;
-    border-radius: 6px;
-    text-decoration: none;
-    font-weight: bold;
+.navbar-register {
+  color: rgb(86, 67, 255);
+  background-color: rgb(37, 255, 103);
+  padding: 0.35rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: bold;
 }
-.navbar-user{
-    color: rgb(0, 154, 165);
-    text-decoration: none;
-    font-weight: bold;
+
+.navbar-user {
+  color: rgb(0, 154, 165);
+  text-decoration: none;
+  font-weight: bold;
 }
+
 .navbar-logout {
-    color:rgb(255, 6, 6);
-    padding:0.35rem;
-    text-decoration: none;
-    font-weight: bold;
+  color: rgb(255, 6, 6);
+  padding: 0.35rem;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.cursor-pointer {
+  cursor: pointer;
 }
