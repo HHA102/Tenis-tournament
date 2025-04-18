@@ -82,7 +82,16 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div>
+    <div className="min-h-screen w-full bg-gradient-to-br from-blue-500 to-purple-600"
+      style={{
+      backgroundImage: `url('https://img.freepik.com/free-photo/blue-surface-with-study-tools_23-2147864592.jpg?semt=ais_hybrid')`,
+      backgroundSize: 'cover', // Ensures the image covers the entire screen
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundAttachment: 'fixed', // Keeps the background fixed when scrolling
+      height: '100vh', // Ensures full height
+      width: '100vw', // Ensures full width
+    }}>
       <h1>Admin Dashboard</h1>
 
       {/* Form tạo người dùng */}

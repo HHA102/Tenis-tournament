@@ -205,7 +205,17 @@ const OrganizerDashboard = () => {
   };
 
   return (
-    <div className="p-6">
+    <div className="min-h-screen w-full bg-gradient-to-br from-blue-500 to-purple-600"
+      style={{
+      backgroundImage: `url('https://pbs.twimg.com/media/FNgxCoIVcAAwhNV?format=jpg&name=large')`,
+      backgroundSize: 'cover', // Ensures the image covers the entire screen
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundAttachment: 'fixed', // Keeps the background fixed when scrolling
+      height: '100vh', // Ensures full height
+      width: '100vw', // Ensures full width
+    }}>
+      
       <h1 className="text-2xl font-bold mb-4">Organizer Dashboard</h1>
 
       {/* Add Tournament Form */}
