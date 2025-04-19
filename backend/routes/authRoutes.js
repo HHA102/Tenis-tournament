@@ -15,4 +15,7 @@ router.post("/refresh", authController.requestRefreshToken);
 //LOGOUT
 router.post("/logout", authController.userLogout);
 
+//UPDATE PASSWORD
+router.put("/update-password", middlewareController.verifyToken, authController.updatePassword);
+
 module.exports = router;

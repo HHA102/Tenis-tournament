@@ -2,9 +2,9 @@ const Court = require('../models/Court');
 
 const courtController = {
     createCourt: async (req, res) => {
-        const { name, location, size } = req.body;
+        const { name, location, size, surface, features } = req.body;
         try {
-            const court = new Court({ name, location, size });
+            const court = new Court({ name, location, size, surface, features });
             await court.save();
             res.status(201).json(court);
         } catch (error) {

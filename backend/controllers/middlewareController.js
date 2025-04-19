@@ -58,7 +58,16 @@ const middlewareController = {
         res.status(403).json({ error: "Access denied. Only organizers can perform this action." });
       }
     });
-  }
+  },
+  verifyTokenWithCustomRoles: (requiredRoles) => (req, res, next) => {
+    middlewareController.verifyToken(req, res, () => {
+      if (req.user.role && requiredRoles.some((role) => req.user.role.includes(role))) {
+        next();
+      } else {
+        res.status(403).json({ error: "Access denied. You do not have the required roles." });
+      }
+    })
+  },
 };
 
 module.exports = middlewareController;

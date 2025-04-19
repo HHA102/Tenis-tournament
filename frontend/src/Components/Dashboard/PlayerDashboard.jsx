@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
-
+import axiosClient from "../../utils/axiosClient";
 const PlayerDashboard = () => {
   const [playerInfo, setPlayerInfo] = useState({});
   const [tournaments, setTournaments] = useState([]);
@@ -11,28 +10,20 @@ const PlayerDashboard = () => {
   useEffect(() => {
     const fetchPlayerData = async () => {
       try {
-        const token = localStorage.getItem("token");
-
         // Fetch player info
-        const playerResponse = await axios.get("/api/players/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setPlayerInfo(playerResponse.data);
+        const playerResponse = await axiosClient.get("/v1/user/me");
+        setPlayerInfo(playerResponse.data.userInfo);
+        const registeredTournamentsData = playerResponse.data.registeredTournaments;
+        setRegisteredTournaments(registeredTournamentsData);
 
         // Fetch available tournaments
-        const tournamentsResponse = await axios.get("/api/tournaments", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setTournaments(tournamentsResponse.data);
-
-        // Fetch registered tournaments
-        const registeredResponse = await axios.get(
-          "/api/players/registered-tournaments",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+        const tournamentsResponse = await axiosClient.get("/v1/tournaments");
+        const availableTournaments = tournamentsResponse.data.filter(tournament =>
+          !registeredTournamentsData.some(registeredTournament =>
+            registeredTournament._id === tournament._id
+          )
         );
-        setRegisteredTournaments(registeredResponse.data);
+        setTournaments(availableTournaments);
       } catch (error) {
         console.error("Error fetching player data:", error);
       }
@@ -44,25 +35,25 @@ const PlayerDashboard = () => {
   // Handle tournament registration
   const handleRegisterTournament = async () => {
     try {
-      const token = localStorage.getItem("token");
-      await axios.post(
-        "/api/tournaments/register",
+      await axiosClient.post(
+        "/v1/tournaments/register",
         { tournamentId: selectedTournament },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
       );
       alert("Successfully registered for the tournament!");
       // Refresh registered tournaments
       setRegisteredTournaments((prev) => [
         ...prev,
-        tournaments.find((t) => t.id === selectedTournament),
+        { ...tournaments.find((t) => t._id === selectedTournament), myRegistrationStatus: "pending" },
       ]);
+      setTournaments((prev) => prev.filter((t) => t._id !== selectedTournament));
     } catch (error) {
       console.error("Error registering for tournament:", error);
       alert("Failed to register for the tournament.");
     }
   };
+
+  console.log(playerInfo);
+
 
   return (
     <div>
@@ -71,16 +62,16 @@ const PlayerDashboard = () => {
       {/* Player Info Section */}
       <h2>Your Information</h2>
       <p>
-        <strong>Name:</strong> {playerInfo.name}
+        <strong>Name:</strong> {playerInfo.fullName}
       </p>
       <p>
-        <strong>Username:</strong> {playerInfo.username}
+        <strong>Address:</strong> {playerInfo.address}
       </p>
       <p>
-        <strong>Age:</strong> {playerInfo.age}
+        <strong>Phone Number:</strong> {playerInfo.phoneNumber}
       </p>
       <p>
-        <strong>Rank:</strong> {playerInfo.rank}
+        <strong>Date of Birth:</strong> {new Date(playerInfo.dateOfBirth).toLocaleDateString()}
       </p>
 
       {/* Registered Tournaments Section */}
@@ -89,7 +80,7 @@ const PlayerDashboard = () => {
         <ul>
           {registeredTournaments.map((tournament) => (
             <li key={tournament.id}>
-              {tournament.name} - {tournament.date}
+              {tournament.name} - {tournament.status} - {tournament.myRegistrationStatus}
             </li>
           ))}
         </ul>
@@ -105,8 +96,8 @@ const PlayerDashboard = () => {
       >
         <option value="">Select a tournament</option>
         {tournaments.map((tournament) => (
-          <option key={tournament.id} value={tournament.id}>
-            {tournament.name} - {tournament.date}
+          <option key={tournament._id} value={tournament._id}>
+            {tournament.name} - {tournament.status}
           </option>
         ))}
       </select>

@@ -35,7 +35,7 @@ export default function DrawerMenuLayout({ children }) {
         const pathname = window.location.pathname;
         const activeItem = organizerMenu.find(item => item.path === pathname);
         setActiveItem(activeItem);
-    }, [window.location.pathname]);
+    }, []);
 
     return (
         <Box sx={{ display: 'flex' }}>

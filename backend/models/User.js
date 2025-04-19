@@ -40,6 +40,7 @@ const UserSchema = new Schema(
         ROLE.REFEREE,
         ROLE.ADMIN,
         ROLE.SPECTATOR,
+        ROLE.REFERREE_MANAGER
       ], // Giới hạn các giá trị có thể
       default: ROLE.USER,
     },
@@ -49,7 +50,8 @@ const UserSchema = new Schema(
       dateOfBirth: Date,
       address: String
     },
-    createdAt: { type: Date, default: Date.now }
+    createdAt: { type: Date, default: Date.now },
+    fcmTokens: [String]
   },
   { timestamps: true }
 );

@@ -11,6 +11,6 @@ router.post("/", middlewareController.verifyTokenAndOrganizerAuth, courtControll
 
 router.put("/:id", middlewareController.verifyTokenAndOrganizerAuth, courtController.updateCourt);
 
-router.delete("/:id", middlewareController.verifyTokenAndAdminAuth, courtController.deleteCourt);
+router.delete("/:id", middlewareController.verifyTokenAndOrganizerAuth, courtController.deleteCourt);
 
 module.exports = router;

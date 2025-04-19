@@ -170,6 +170,27 @@ const authController = {
       res.status(500).json({ message: "Internal server error." });
     }
   },
+  updatePassword: async (req, res) => {
+    try {
+      const { oldPassword, newPassword } = req.body;
+      const userId = req.user.id;
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      const validPassword = await bcrypt.compare(oldPassword, user.password);
+      if (!validPassword) {
+        return res.status(400).json({ message: "Old password is incorrect" });
+      }
+      const salt = await bcrypt.genSalt(10);
+      const hashed = await bcrypt.hash(newPassword, salt);
+      user.password = hashed;
+      await user.save();
+      res.status(200).json({ message: "Password updated successfully" });
+    } catch (err) {
+      res.status(500).json(err);
+    }
+  }
 }
 
 module.exports = authController;

@@ -1,4 +1,6 @@
 const Notification = require('../models/Notification');
+const User = require('../models/User');
+const { sendNotification } = require('../services/notificationService');
 
 const notificationController = {
     createNotification: async (req, res) => {
@@ -39,6 +41,23 @@ const notificationController = {
         try {
             await Notification.findByIdAndDelete(req.params.id);
             res.status(200).json({ message: 'Notification deleted successfully' });
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+    },
+    pushNotification: async (req, res) => {
+        try {
+            const { title, message, userId } = req.body;
+            const user = await User.findById(userId);
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+            const fcmTokens = user.fcmTokens;
+            const result = await sendNotification(fcmTokens, title, message);
+            if (!result) {
+                return res.status(500).json({ message: 'Failed to send notification' });
+            }
+            res.status(200).json({ message: 'Notification sent successfully' });
         } catch (error) {
             res.status(500).json({ message: error.message });
         }

@@ -1,14 +1,12 @@
-import { Box, Button, Modal, TextField, Typography } from '@mui/material';
-import React, { useState } from 'react';
+import { Box, Button, InputLabel, MenuItem, Modal, Select, TextField, Typography } from '@mui/material';
+import React, { useEffect, useState } from 'react';
 
-const DEFAULT_FORM_DATA = {
-    name: '',
-    location: '',
-    size: ''
-}
-
-const AddCourtModal = ({ open, onClose, onSubmit }) => {
-    const [formData, setFormData] = useState(DEFAULT_FORM_DATA);
+const AddCourtModal = ({ open, onClose, onSubmit, courtToEdit }) => {
+    const [formData, setFormData] = useState({
+        name: '',
+        location: '',
+        surface: 'hard'
+    });
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -17,11 +15,21 @@ const AddCourtModal = ({ open, onClose, onSubmit }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         onSubmit(formData);
+        setFormData({
+            name: '',
+            location: '',
+            surface: 'hard'
+        });
     };
     const handleClose = () => {
-        setFormData(DEFAULT_FORM_DATA);
         onClose?.();
     };
+
+    useEffect(() => {
+        if (courtToEdit) {
+            setFormData(courtToEdit);
+        }
+    }, [courtToEdit]);
 
     return (
         <Modal open={open} onClose={handleClose}>
@@ -43,13 +51,20 @@ const AddCourtModal = ({ open, onClose, onSubmit }) => {
                             onChange={handleChange}
                             fullWidth
                         />
-                        <TextField
-                            label="Court Size"
-                            name="size"
-                            value={formData.size}
+                        <InputLabel id="surface-select-label">Surface</InputLabel>
+                        <Select
+                            labelId="surface-select-label"
+                            id="surface-select"
+                            value={formData.surface}
+                            label="Surface"
+                            name="surface"
                             onChange={handleChange}
-                            fullWidth
-                        />
+                        >
+                            <MenuItem value={'hard'}>Hard</MenuItem>
+                            <MenuItem value={'clay'}>Clay</MenuItem>
+                            <MenuItem value={'grass'}>Grass</MenuItem>
+                            <MenuItem value={'artificial'}>Artificial</MenuItem>
+                        </Select>
                         <Button type="submit" variant="contained">Add Court</Button>
                     </div>
                 </form>

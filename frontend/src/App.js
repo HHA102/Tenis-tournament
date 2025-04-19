@@ -13,7 +13,25 @@ import Register from "./Components/Register/Register";
 import ApplicationsManagement from "./pages/ApplicationsManagement";
 import DrawerMenuLayout from "./Components/Layout/Drawer";
 import CourtsManagement from "./pages/CourtsManagement";
+import { messaging, onMessage, requestNotificationPermission } from "./utils/firebase";
+import { useSelector } from "react-redux";
+import { useEffect } from "react";
+import showNotification from "./utils/notification";
 function App() {
+  const isLoggedIn = useSelector((state) => state.auth.login?.currentUser);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      requestNotificationPermission();
+    }
+  }, [isLoggedIn]);
+
+  useEffect(() => {
+    onMessage(messaging, (payload) => {
+      showNotification(payload.notification.title, payload.notification.body);
+    });
+  }, []);
+
   return (
     <Router>
       <NavBar />

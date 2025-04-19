@@ -1,5 +1,6 @@
 const tournamentController = require("../controllers/tournamentController");
 const middlewareController = require("../controllers/middlewareController");
+const { ROLE } = require("../constants");
 
 const router = require('express').Router();
 
@@ -14,5 +15,17 @@ router.put("/:id", middlewareController.verifyTokenAndOrganizerAuth, tournamentC
 
 // Xóa giải đấu (chỉ admin hoặc organizer có quyền)
 router.delete("/:id", middlewareController.verifyTokenAndAdminAuth, tournamentController.deleteTournament);
+
+router.get("/:id", middlewareController.verifyToken, tournamentController.getTournamentById);
+
+router.post("/register", middlewareController.verifyToken, tournamentController.registerTournament);
+
+router.post("/approve-registration", middlewareController.verifyTokenAndOrganizerAuth, tournamentController.approveRegistration);
+
+router.post("/decline-registration", middlewareController.verifyTokenAndOrganizerAuth, tournamentController.declineRegistration);
+
+router.get("/info/:id", middlewareController.verifyTokenWithCustomRoles([ROLE.PLAYER, ROLE.ORGANIZER, ROLE.SPECTATOR]), tournamentController.getTournamentInfoById);
+
+router.get("/info/:id/matches", middlewareController.verifyTokenWithCustomRoles([ROLE.PLAYER, ROLE.ORGANIZER, ROLE.SPECTATOR]), tournamentController.getTournamentMatches);
 
 module.exports = router;
