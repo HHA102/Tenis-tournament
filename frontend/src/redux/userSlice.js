@@ -25,7 +25,7 @@ const userSlice = createSlice({
     deleteUserStart: (state) => {
       state.users.isFetching = true;
     },
-    deleteUserSuccess: (state, action) => {
+    deleteUsersSuccess: (state, action) => {
       state.users.isFetching = false;
       state.msg = action.payload;
     },
@@ -42,7 +42,7 @@ export const {
   getUsersSuccess,
   getUsersFailed,
   deleteUserStart,
-  deleteUserSuccess,
+  deleteUsersSuccess,
   deleteUserFailed,
 } = userSlice.actions;
 

@@ -1,4 +1,4 @@
-.login-container {
+/* .login-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -52,4 +52,138 @@ button {
   margin-top: 1rem;
   color: rgb(105, 105, 105);
   font-weight: 700;
+} */
+
+/* General Container */
+/* General Page Styles */
+.login-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  /* Gradient bao phủ toàn bộ chiều cao */
+  width: 100vw;
+  /* Gradient bao phủ toàn bộ chiều rộng */
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  /* Gradient xanh dương */
+  font-family: "Arial", sans-serif;
+  color: #fff;
+  /* Màu chữ trắng */
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  /* Ẩn thanh cuộn */
+}
+
+/* Login Container */
+.login-container {
+  background: rgb(255, 255, 255);
+  color: #fff;
+  /* Chữ trắng */
+  width: 100%;
+  max-width: 400px;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  /* Đổ bóng */
+  text-align: center;
+}
+
+/* Title */
+.login-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  color: #000000;
+}
+
+/* Form Styles */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-label-login {
+  font-size: 1rem;
+  font-weight: bold;
+  text-align: left;
+  color: #000000;
+  /* Chữ trắng */
+  width: 100%;
+}
+
+/* Input Fields */
+.form-input-login {
+  position: relative;
+  /* Đặt vị trí tương đối để pseudo-element hoạt động */
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #000000;
+  /* Viền input */
+  border-radius: 5px;
+  outline: none;
+  background: rgba(255, 255, 255, 0.2);
+  /* Nền mờ */
+  color: #000000;
+  /* Chữ trắng */
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  margin: 0;
+}
+
+.form-input-login::placeholder {
+  color: rgba(0, 0, 0, 0.6);
+  /* Chữ placeholder trắng mờ */
+}
+
+.form-input-login:focus {
+  border: 1px solid #000000;
+  /* Đường viền trắng */
+  box-shadow: 0 0 5px rgba(216, 23, 255, 0.7);
+  /* Hiệu ứng ánh sáng trắng */
+}
+
+/* Button Styles */
+.form-button {
+  padding: 12px;
+  font-size: 1rem;
+  font-weight: bold;
+  color: #fff;
+  background: linear-gradient(135deg, #762ac7, #2575fc);
+  /* Gradient xanh tím */
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.form-button:hover {
+  transform: scale(1.05);
+  background: linear-gradient(135deg, #2575fc, #853dd1);
+  /* Đảo ngược gradient */
+}
+
+.form-button:active {
+  transform: scale(0.95);
+}
+
+/* Footer Styles */
+.login-footer {
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+  color: #000;
+}
+
+.login-register-link {
+  color: #000000;
+  /* Chữ trắng */
+  font-weight: bold;
+  text-decoration: underline;
+  transition: color 0.3s ease;
+}
+
+.login-register-link:hover {
+  color: #5922f0;
+  /* Chữ trắng sáng hơn khi hover */
 }

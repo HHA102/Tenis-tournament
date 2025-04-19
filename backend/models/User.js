@@ -1,28 +1,61 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
+const { ROLE } = require("../constants/index");
+const Schema = mongoose.Schema;
 
-const userSchema = new mongoose.Schema({
-        username:{
-            type: String,
-            required: true,
-            unique:true
-        },
+const UserSchema = new Schema(
+  {
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+    },
 
-        email:{
-            type: String,
-            required: true,
-            unique:true
-        },
-        password:{
-            type: String,
-            required: true,
-            unique:true
-        },
-        admin:{
-            type: Boolean,
-            default: false,
-        },
-
-}, {timestamps: true}
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    password: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    admin: {
+      type: Boolean,
+      default: false,
+    },
+    refreshTokens: [
+      {
+        token: { type: String, required: true },
+        expiresAt: { type: Date, required: true },
+      }
+    ],
+    role: {
+      type: [String],
+      enum: [
+        ROLE.USER,
+        ROLE.PLAYER,
+        ROLE.SPONSOR,
+        ROLE.ORGANIZER,
+        ROLE.REFEREE,
+        ROLE.ADMIN,
+        ROLE.SPECTATOR,
+        ROLE.REFERREE_MANAGER
+      ], // Giới hạn các giá trị có thể
+      default: ROLE.USER,
+    },
+    personalInfo: {
+      fullName: String,
+      phoneNumber: String,
+      dateOfBirth: Date,
+      address: String
+    },
+    createdAt: { type: Date, default: Date.now },
+    fcmTokens: [String]
+  },
+  { timestamps: true }
 );
 
-module.exports =  mongoose.model('user', userSchema);
+module.exports = mongoose.model("User", UserSchema);
+
+

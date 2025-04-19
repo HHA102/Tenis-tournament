@@ -1,100 +1,52 @@
 import axios from "axios";
+import { store } from "../redux/store";
+import { setAccessToken } from "../redux/authSlice";
 
-// Create an Axios instance
-const apiClient = axios.create({
-  baseURL: process.env.REACT_APP_API_URL,
-  timeout: 10000,
+const API_BASE_URL = `${process.env.REACT_APP_API_URL}`;
+
+const axiosClient = axios.create({
+  baseURL: API_BASE_URL,
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-const getAccessToken = () => {
-  return localStorage.getItem("accessToken");
+export const saveNewAccessToken = (token) => {
+  store.dispatch(setAccessToken(token));
 };
 
-export const setTokens = (accessToken, refreshToken) => {
-  localStorage.setItem("accessToken", accessToken);
-  localStorage.setItem("refreshToken", refreshToken);
-};
-
-const getRefreshToken = () => {
-  return localStorage.getItem("refreshToken");
-};
-
-apiClient.interceptors.request.use(
+axiosClient.interceptors.request.use(
   (config) => {
-    const token = getAccessToken();
-    if (token) {
-      config.headers["Token"] = `Bearer ${token}`;
+    const accessToken = store.getState()?.auth?.login?.accessToken;
+    if (accessToken) {
+      config.headers["Authorization"] = `Bearer ${accessToken}`;
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-let isRefreshing = false;
-let refreshSubscribers = [];
-
-const onTokenRefreshed = (newAccessToken) => {
-  refreshSubscribers.forEach((callback) => callback(newAccessToken));
-  refreshSubscribers = [];
-};
-
-const addRefreshSubscriber = (callback) => {
-  refreshSubscribers.push(callback);
-};
-
-// Response interceptor to handle 401 errors
-apiClient.interceptors.response.use(
+axiosClient.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const originalRequest = error.config;
-
-    if (
-      error.response &&
-      error.response.status === 401 &&
-      !originalRequest._retry
-    ) {
-      if (isRefreshing) {
-        return new Promise((resolve) => {
-          addRefreshSubscriber((newAccessToken) => {
-            originalRequest.headers["Token"] = `Bearer ${newAccessToken}`;
-            resolve(apiClient(originalRequest));
-          });
-        });
-      }
-
-      originalRequest._retry = true;
-      isRefreshing = true;
+    if (error.response?.status === 401 && !error.config._retry) {
+      error.config._retry = true; // Prevent infinite loop
 
       try {
-        const refreshToken = getRefreshToken();
-        const response = await axios.post(
-          `${process.env.REACT_APP_API_URL}/v1/auth/refresh`,
-          { refreshToken }
-        );
-
-        const { accessToken, refreshToken: newRefreshToken } = response.data;
-        setTokens(accessToken, newRefreshToken);
-
-        apiClient.defaults.headers["Token"] = `Bearer ${accessToken}`;
-        onTokenRefreshed(accessToken);
-        isRefreshing = false;
-
-        return apiClient(originalRequest);
+        const res = await axios.post(`${API_BASE_URL}/v1/auth/refresh`, {}, { withCredentials: true });
+        const newAccessToken = res.data.accessToken;
+        saveNewAccessToken(newAccessToken);
+        // Retry original request with new token
+        error.config.headers["Authorization"] = `Bearer ${newAccessToken}`;
+        return axiosClient(error.config);
       } catch (refreshError) {
-        isRefreshing = false;
-        // Handle token refresh failure (e.g., log out the user)
         console.error("Token refresh failed:", refreshError);
         return Promise.reject(refreshError);
       }
     }
-
     return Promise.reject(error);
   }
 );
 
-export default apiClient;
+export default axiosClient;
