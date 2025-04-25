@@ -6,6 +6,11 @@ const transformUserForResponse = (user) => {
         role: user.role[0],
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
+        personalInfo: {
+            fullName: user.personalInfo.fullName,
+            dateOfBirth: user.personalInfo.dateOfBirth,
+            address: user.personalInfo.address
+        }
     };
 
 }

@@ -1,8 +1,9 @@
-
 const middlewareController = require('../controllers/middlewareController');
 const userController = require('../controllers/userController');
+const upload = require('../config/multer');
+const express = require('express');
 
-const router = require('express').Router();
+const router = express.Router();
 
 //GET ALL USERS
 router.get('/', middlewareController.verifyToken, userController.getAllUsers);
@@ -24,5 +25,13 @@ router.put('/update/fcmToken', middlewareController.verifyToken, userController.
 
 //GET USER DETAIL BY TOKEN
 router.get('/me', middlewareController.verifyToken, userController.getUserByToken);
+
+//UPDATE USER PROFILE PICTURE
+router.put(
+    '/update/profilePicture',
+    middlewareController.verifyToken,
+    upload.single('file'),
+    userController.updateProfilePicture
+);
 
 module.exports = router;

@@ -1,4 +1,4 @@
-const { ROLE, REGISTRATION_STATUS } = require("../constants");
+const { ROLE, REGISTRATION_STATUS, THEME_BG } = require("../constants");
 const Match = require("../models/Match");
 const Notification = require("../models/Notification");
 const Tournament = require("../models/Tournament");
@@ -8,9 +8,53 @@ const { transformUserForResponse } = require("../services/userService");
 
 const tournamentController = {
   getAllTournaments: async (req, res) => {
+    const pageIndex = parseInt(req.query.pageIndex) || 0;
+    const pageSize = parseInt(req.query.pageSize) || 10;
     try {
       const tournaments = await Tournament.find();
-      res.status(200).json(tournaments);
+      const transformedTournaments = await Promise.all(tournaments.map(async (tournament) => {
+        const tournamentObj = tournament.toObject();
+        const organizer = await User.findById(tournamentObj.organizer);
+        const transformedParticipants = await Promise.all(tournament.participants.map(async (participant) => {
+          const player = await User.findById(participant.player);
+          return {
+            ...participant.toObject(),
+            player: transformUserForResponse(player)
+          }
+        }));
+        return {
+          ...tournamentObj,
+          organizer: transformUserForResponse(organizer),
+          participants: transformedParticipants
+        }
+      }));
+      const startIndex = pageIndex * pageSize;
+      const paginatedTournaments = transformedTournaments.slice(startIndex, startIndex + pageSize);
+      res.status(200).json({
+        tournaments: paginatedTournaments,
+        pagination: {
+          totalTournaments: transformedTournaments.length,
+          pageIndex,
+          pageSize,
+          totalPages: Math.ceil(transformedTournaments.length / pageSize)
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching tournaments:", error);
+      res.status(500).json({ error: "Failed to fetch tournaments", details: error.message });
+    }
+  },
+  getTournamentCalendar: async (req, res) => {
+    try {
+      const tournament = await Tournament.find();
+      const tournamentsCalendar = tournament.map(tournament => ({
+        _id: tournament._id,
+        title: tournament.name,
+        startTime: tournament.startDate,
+        endTime: tournament.endDate,
+        theme: THEME_BG[Math.floor(Math.random() * THEME_BG.length)],
+      }))
+      res.status(200).json(tournamentsCalendar);
     } catch (error) {
       console.error("Error fetching tournaments:", error);
       res.status(500).json({ error: "Failed to fetch tournaments", details: error.message });
@@ -80,12 +124,20 @@ const tournamentController = {
   registerTournament: async (req, res) => {
     try {
       const { tournamentId, userId } = req.body;
-      let registerUserId;
+      let userObj;
 
       if (!userId) {
-        registerUserId = req.user.id;
+        userObj = req.user;
       } else {
-        registerUserId = userId;
+        userObj = await User.findById(userId);
+      }
+
+      if (!userObj) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      if (!userObj.role.includes(ROLE.PLAYER)) {
+        return res.status(403).json({ error: "Access denied. Only players can register for tournaments." });
       }
 
       const tournament = await Tournament.findById(tournamentId);
@@ -93,12 +145,15 @@ const tournamentController = {
         return res.status(404).json({ error: "Tournament not found" });
       }
 
-      const user = await User.findById(registerUserId);
-      if (!user) {
-        return res.status(404).json({ error: "User not found" });
+      if (new Date() > new Date(tournament.registrationDeadline)) {
+        return res.status(400).json({ error: "Registration deadline has passed." });
       }
 
-      tournament.participants.push({ player: registerUserId, registrationDate: new Date(), status: "pending" });
+      if (tournament.participants.some(p => p.player.toString() === userObj._id.toString())) {
+        return res.status(400).json({ error: "You have already registered for this tournament." });
+      }
+
+      tournament.participants.push({ player: userObj._id, registrationDate: new Date(), status: "pending" });
       await tournament.save();
 
       res.status(200).json({ message: "Tournament registered successfully" });
@@ -154,10 +209,7 @@ const tournamentController = {
 
       const user = await User.findById(participant.player);
       if (user.fcmTokens.length > 0) {
-        const result = await sendNotification(user.fcmTokens, "Registration Approved", `Your registration for ${tournament.name} has been approved.`);
-        if (!result) {
-          return res.status(500).json({ message: 'Failed to send notification' });
-        }
+        await sendNotification(user.fcmTokens, "Registration Approved", `Your registration for ${tournament.name} has been approved.`);
       }
 
       res.status(200).json({ message: "Registration approved successfully" });
@@ -201,10 +253,7 @@ const tournamentController = {
 
       const user = await User.findById(participant.player);
       if (user.fcmTokens.length > 0) {
-        const result = await sendNotification(user.fcmTokens, "Registration Rejected", `Your registration for ${tournament.name} has been rejected.`);
-        if (!result) {
-          return res.status(500).json({ message: 'Failed to send notification' });
-        }
+        await sendNotification(user.fcmTokens, "Registration Rejected", `Your registration for ${tournament.name} has been rejected.`);
       }
 
       res.status(200).json({ message: "Registration rejected successfully" });

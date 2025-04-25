@@ -1,12 +1,30 @@
-const { ROLE } = require('../constants');
+const { ROLE, MATCH_STATUS } = require('../constants');
 const Court = require('../models/Court');
 const Match = require('../models/Match');
+const User = require('../models/User');
 const Tournament = require('../models/Tournament');
+const { transformUserForResponse } = require('../services/userService');
 
 const matchController = {
+    populateMatchInfo: async (match) => {
+        const matchObj = match.toObject();
+        const player1Id = match.player1;
+        const player2Id = match.player2;
+        const player1 = await User.findById(player1Id);
+        const player2 = await User.findById(player2Id);
+        matchObj.player1 = transformUserForResponse(player1);
+        matchObj.player2 = transformUserForResponse(player2);
+        const courtId = match.court;
+        const court = await Court.findById(courtId);
+        matchObj.court = court;
+        const refereeId = match.referee;
+        const referee = await User.findById(refereeId);
+        matchObj.referee = transformUserForResponse(referee);
+        matchObj.tournament = await Tournament.findById(match.tournament);
+        return matchObj;
+    },
     createMatch: async (req, res) => {
         const { player1, player2, scheduledTime, location, tournamentId, court, round, referee } = req.body;
-        console.log('req.body', req.body);
 
         try {
             if (scheduledTime) {
@@ -86,23 +104,56 @@ const matchController = {
             if (!match) {
                 return res.status(404).json({ message: 'Match not found' });
             }
-            const player1Id = match.player1;
-            const player2Id = match.player2;
-            const player1 = await User.findById(player1Id);
-            const player2 = await User.findById(player2Id);
-            match.player1 = player1;
-            match.player2 = player2;
-            const courtId = match.court;
-            const court = await Court.findById(courtId);
-            match.court = court;
-            const refereeId = match.referee;
-            const referee = await User.findById(refereeId);
-            match.referee = referee;
-            res.status(200).json(match);
+            const matchObj = await matchController.populateMatchInfo(match);
+            res.status(200).json(matchObj);
         } catch (error) {
             res.status(500).json({ message: error.message });
         }
     },
+    getOngoingMatches: async (req, res) => {
+        try {
+            const matches = await Match.find({ status: MATCH_STATUS.ONGOING });
+            const matchesObj = await Promise.all(matches.map(async (match) => {
+                const matchObj = await matchController.populateMatchInfo(match);
+                return matchObj;
+            }));
+            res.status(200).json(matchesObj);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+    },
+    getFeaturedMatch: async (req, res) => {
+        try {
+            const match = await Match.findOne({ isFeatured: true });
+            if (!match) {
+                return res.status(404).json({ message: 'No featured match found' });
+            }
+            const matchObj = await matchController.populateMatchInfo(match);
+            res.status(200).json(matchObj);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+    },
+    nominateFeaturedMatch: async (req, res) => {
+        try {
+            const featuredMatch = await Match.findOne({ isFeatured: true });
+            if (featuredMatch) {
+                featuredMatch.isFeatured = false;
+                await featuredMatch.save();
+            }
+
+            const { matchId } = req.body;
+            const match = await Match.findById(matchId);
+            if (!match) {
+                return res.status(404).json({ message: 'Match not found' });
+            }
+            match.isFeatured = true;
+            await match.save();
+            res.status(200).json(match);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+    }
 }
 
 module.exports = matchController;
