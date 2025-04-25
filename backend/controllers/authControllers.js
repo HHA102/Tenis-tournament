@@ -14,6 +14,12 @@ const authController = {
         email: req.body.email,
         password: hashed,
         role: req.body.role ?? "user",
+        personalInfo: {
+          fullName: req.body.fullName,
+          phoneNumber: req.body.phoneNumber,
+          dateOfBirth: req.body.dateOfBirth,
+          address: req.body.address
+        }
       });
       //save to database
       const user = await newUser.save();
@@ -64,12 +70,12 @@ const authController = {
 
       const user = await User.findOne({ username: req.body.username });
       if (!user) {
-        return res.status(404).json("Wrong username!");
+        return res.status(400).json("Wrong username!");
       }
 
       const valiPassword = await bcrypt.compare(req.body.password, user.password);
       if (!valiPassword) {
-        return res.status(404).json("Wrong password!");
+        return res.status(400).json("Wrong password!");
       }
 
       const accessToken = authController.generateAccessToken(user);
@@ -85,6 +91,7 @@ const authController = {
         secure: false,
         path: "/",
         sameSite: "lax",
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30d
       });
 
       const userData = user.toObject();
@@ -131,6 +138,7 @@ const authController = {
           secure: false,
           path: "/",
           sameSite: "lax",
+          maxAge: 30 * 24 * 60 * 60 * 1000, // 30d
         });
 
         res.status(200).json({ accessToken: newAccessToken });
@@ -146,7 +154,6 @@ const authController = {
   userLogout: async (req, res) => {
     try {
       const refreshToken = req.cookies.refreshToken;
-      if (!refreshToken) return res.status(400).json({ message: "No refresh token provided." });
 
       const user = await User.findOne({ "refreshTokens.token": refreshToken });
       if (!user) {

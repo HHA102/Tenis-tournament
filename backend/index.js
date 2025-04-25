@@ -11,9 +11,10 @@ const courtRoutes = require('./routes/courtRoutes');
 const matchRoutes = require('./routes/matchRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const incidentRoutes = require('./routes/incidentRoutes');
+const fileRoutes = require('./routes/fileRoutes');
 
 const admin = require("firebase-admin");
-const serviceAccount = require("./creds/tennis-tournament-5de3c-firebase-adminsdk-fbsvc-37d732b053.json");
+const serviceAccount = require("./creds/tennis-tournament-48ed0-firebase-adminsdk-fbsvc-58a40db2b2.json");
 dotenv.config();
 const app = express();
 
@@ -33,7 +34,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
+    credential: admin.credential.cert(serviceAccount),
+    projectId: "tennis-tournament-48ed0"
 });
 
 //ROUTES
@@ -44,6 +46,7 @@ app.use('/v1/courts', courtRoutes);
 app.use('/v1/matches', matchRoutes);
 app.use('/v1/notification', notificationRoutes);
 app.use('/v1/incident', incidentRoutes);
+app.use('/v1/file', fileRoutes);
 
 app.listen(8000, () => {
     console.log('Server is running');

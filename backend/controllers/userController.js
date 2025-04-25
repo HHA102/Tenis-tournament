@@ -1,6 +1,7 @@
 const Tournament = require("../models/Tournament");
 const User = require("../models/User");
 const mongoose = require("mongoose");
+const fs = require("fs");
 
 const userController = {
   //GET ALL USERS
@@ -34,12 +35,13 @@ const userController = {
   updatePersonalInfo: async (req, res) => {
     try {
       const userId = req.user.id;
-      const { email, phone, fullName, dateOfBirth, address } = req.body;
+      const { email, phoneNumber, fullName, dateOfBirth, address } = req.body;
       const user = await User.findById(userId);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-      user.personalInfo = { email, phone, fullName, dateOfBirth, address };
+      user.email = email;
+      user.personalInfo = { phoneNumber, fullName, dateOfBirth, address };
       await user.save();
       res.status(200).json({ message: "Personal info updated successfully" });
     } catch (err) {
@@ -63,13 +65,13 @@ const userController = {
   },
   updatePhone: async (req, res) => {
     try {
-      const { phone } = req.body;
+      const { phoneNumber } = req.body;
       const userId = req.user.id;
       const user = await User.findById(userId);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-      user.phone = phone;
+      user.personalInfo.phoneNumber = phoneNumber;
       await user.save();
       res.status(200).json({ message: "Phone updated successfully" });
     } catch (err) {
@@ -126,9 +128,41 @@ const userController = {
 
       res.status(200).json({
         userInfo: user.personalInfo,
+        email: user.email,
+        username: user.username,
+        profilePicture: user.profilePicture,
         registeredTournaments: registeredTournamentsData
       });
     } catch (err) {
+      res.status(500).json(err);
+    }
+  },
+  updateProfilePicture: async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      // Save the file path to the database
+      const filePath = req.file.path;
+      // delete the old profile picture
+      if (user.profilePicture) {
+        fs.unlinkSync(user.profilePicture);
+      }
+      user.profilePicture = filePath;
+      await user.save();
+
+      res.status(200).json({
+        message: "Profile picture updated successfully",
+      });
+    } catch (err) {
+      console.log('Error:', err);
       res.status(500).json(err);
     }
   }

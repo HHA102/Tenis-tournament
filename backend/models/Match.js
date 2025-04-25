@@ -29,7 +29,9 @@ const MatchSchema = new Schema({
             player2Score: Number
         },
         isLive: { type: Boolean, default: false }
-    }
+    },
+    liveStreamId: { type: String, default: null },
+    isFeatured: { type: Boolean, default: false }
 })
 
 module.exports = mongoose.model("Match", MatchSchema);

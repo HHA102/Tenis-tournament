@@ -8,12 +8,20 @@ router.post("/", middlewareController.verifyTokenAndOrganizerAuth, matchControll
 
 router.get("/", middlewareController.verifyToken, matchController.getMatches);
 
+router.get("/info/:id", middlewareController.verifyToken, matchController.getMatchInfoById);
+
+router.get("/featured", middlewareController.verifyToken, matchController.getFeaturedMatch);
+
+router.get("/ongoing", middlewareController.verifyToken, matchController.getOngoingMatches);
+
 router.get("/:id", middlewareController.verifyToken, matchController.getMatchById);
 
 router.put("/:id", middlewareController.verifyTokenAndOrganizerAuth, matchController.updateMatch);
 
 router.delete("/:id", middlewareController.verifyTokenAndOrganizerAuth, matchController.deleteMatch);
 
-router.post("/assign-referee", middlewareController.verifyTokenWithCustomRoles([ROLE.REFERREE_MANAGER, ROLE.ORGANIZER]), matchController.assignReferee)
+router.post("/assign-referee", middlewareController.verifyTokenWithCustomRoles([ROLE.REFEREE_MANAGER, ROLE.ORGANIZER]), matchController.assignReferee)
+
+router.post("/nominate-featured", middlewareController.verifyTokenAndOrganizerAuth, matchController.nominateFeaturedMatch);
 
 module.exports = router;
