@@ -23,7 +23,10 @@ const middlewareController = {
           return res.status(403).json({ message: "Token is invalid" });
         }
 
-        req.user = user; // Attach user data to request
+        req.user = {
+          ...user,
+          _id: user.id.toString()
+        }; // Attach user data to request
         next();
       });
     } catch (error) {

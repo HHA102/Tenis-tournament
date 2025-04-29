@@ -28,7 +28,7 @@ const UserSchema = new Schema(
       {
         token: { type: String, required: true },
         expiresAt: { type: Date, required: true },
-      }
+      },
     ],
     role: {
       type: [String],
@@ -40,23 +40,21 @@ const UserSchema = new Schema(
         ROLE.REFEREE,
         ROLE.ADMIN,
         ROLE.SPECTATOR,
-        ROLE.REFEREE_MANAGER
+        ROLE.REFEREE_MANAGER,
       ], // Giới hạn các giá trị có thể
       default: ROLE.USER,
     },
     personalInfo: {
-      fullName: { type: String, required: true },
+      fullName: String,
       phoneNumber: String,
       dateOfBirth: Date,
-      address: String
+      address: String,
     },
     createdAt: { type: Date, default: Date.now },
     fcmTokens: [String],
-    profilePicture: String
+    profilePicture: String,
   },
   { timestamps: true }
 );
 
 module.exports = mongoose.model("User", UserSchema);
-
-
