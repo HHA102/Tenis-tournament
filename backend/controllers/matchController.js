@@ -4,6 +4,7 @@ const Match = require("../models/Match");
 const User = require("../models/User");
 const Tournament = require("../models/Tournament");
 const { transformUserForResponse } = require("../services/userService");
+const { default: queryString } = require("query-string");
 
 const matchController = {
   populateMatchInfo: async (match) => {
@@ -18,8 +19,10 @@ const matchController = {
     const court = await Court.findById(courtId);
     matchObj.court = court;
     const refereeId = match.referee;
-    const referee = await User.findById(refereeId);
-    matchObj.referee = transformUserForResponse(referee);
+    if (refereeId) {
+      const referee = await User.findById(refereeId);
+      matchObj.referee = transformUserForResponse(referee);
+    }
     matchObj.tournament = await Tournament.findById(match.tournament);
     return matchObj;
   },
@@ -48,11 +51,9 @@ const matchController = {
           now.getTime() + 1000 * 60 * 60 * 24 >
           scheduledTimeToDate.getTime()
         ) {
-          return res
-            .status(400)
-            .json({
-              message: "Scheduled time must be at least 24 hours from now",
-            });
+          return res.status(400).json({
+            message: "Scheduled time must be at least 24 hours from now",
+          });
         }
       }
 
@@ -119,8 +120,6 @@ const matchController = {
         return res.status(404).json({ message: "Match not found" });
       }
       match.referee = refereeId;
-      console.log("match", match);
-
       await match.save();
       res.status(200).json(match);
     } catch (error) {
@@ -179,6 +178,57 @@ const matchController = {
         return res.status(404).json({ message: "Match not found" });
       }
       match.isFeatured = true;
+      await match.save();
+      res.status(200).json(match);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  },
+  updateLivestreamUrl: async (req, res) => {
+    try {
+      const livestreamUrl = req.body.livestreamUrl;
+      const parsedUrl = queryString.parseUrl(livestreamUrl);
+
+      const match = await Match.findByIdAndUpdate(
+        req.params.id,
+        {
+          liveStreamId: parsedUrl?.query?.v ?? "",
+        },
+        {
+          new: true,
+        }
+      );
+      const matchObj = await matchController.populateMatchInfo(match);
+      res.status(200).json(matchObj);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  },
+  startMatch: async (req, res) => {
+    try {
+      const matchId = req.body.matchId;
+      const match = await Match.findById(matchId);
+      if (!match) {
+        return res.status(404).json({ message: "Match not found" });
+      }
+      if (req.user.id !== match.referee.toString()) {
+        return res
+          .status(403)
+          .json({ message: "You are not the match's referee" });
+      }
+      match.status = MATCH_STATUS.ONGOING;
+      match.liveScore = {
+        currentSet: 1,
+        currentGame: {
+          player1: {
+            score: 0,
+          },
+          player2: {
+            score: 0,
+          },
+        },
+        isLive: true,
+      };
       await match.save();
       res.status(200).json(match);
     } catch (error) {

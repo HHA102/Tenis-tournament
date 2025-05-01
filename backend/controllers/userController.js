@@ -116,22 +116,26 @@ const userController = {
         return res.status(404).json({ message: "User not found" });
       }
       const registeredTournaments = await Tournament.find({
-        'participants.player': mongoose.Types.ObjectId(req.user.id)
+        "participants.player": mongoose.Types.ObjectId(req.user.id),
       });
 
-      const registeredTournamentsData = registeredTournaments.map(tournament => ({
-        _id: tournament._id,
-        name: tournament.name,
-        status: tournament.status,
-        myRegistrationStatus: tournament.participants.find(p => p.player.toString() === req.user.id).status
-      }));
+      const registeredTournamentsData = registeredTournaments.map(
+        (tournament) => ({
+          _id: tournament._id,
+          name: tournament.name,
+          status: tournament.status,
+          myRegistrationStatus: tournament.participants.find(
+            (p) => p.player.toString() === req.user.id
+          ).status,
+        })
+      );
 
       res.status(200).json({
         userInfo: user.personalInfo,
         email: user.email,
         username: user.username,
         profilePicture: user.profilePicture,
-        registeredTournaments: registeredTournamentsData
+        registeredTournaments: registeredTournamentsData,
       });
     } catch (err) {
       res.status(500).json(err);
@@ -162,10 +166,33 @@ const userController = {
         message: "Profile picture updated successfully",
       });
     } catch (err) {
-      console.log('Error:', err);
+      console.log("Error:", err);
       res.status(500).json(err);
     }
-  }
+  },
+  getAllUserByRole: async (req, res) => {
+    try {
+      const role = req.params.role;
+
+      const users = await User.find({ role: role });
+      if (!users) {
+        return res.status(404).json({ message: "No users found" });
+      }
+      const transformedUser = await Promise.all(
+        users.map((u) => {
+          const obj = u.toObject();
+          delete obj.password;
+          delete obj.fcmTokens;
+          delete obj.refreshTokens;
+          return obj;
+        })
+      );
+      res.status(200).json(transformedUser);
+    } catch (error) {
+      console.log("Error:", error);
+      res.status(500).json(error);
+    }
+  },
 };
 
 module.exports = userController;

@@ -37,6 +37,12 @@ router.get(
 );
 
 router.put(
+  "/start",
+  middlewareController.verifyTokenWithCustomRoles([ROLE.REFEREE]),
+  matchController.startMatch
+);
+
+router.put(
   "/:id",
   middlewareController.verifyTokenWithCustomRoles([
     ROLE.ORGANIZER,
@@ -44,6 +50,16 @@ router.put(
     ROLE.REFEREE_MANAGER,
   ]),
   matchController.updateMatch
+);
+
+router.put(
+  "/:id/livestream",
+  middlewareController.verifyTokenWithCustomRoles([
+    ROLE.ORGANIZER,
+    ROLE.REFEREE,
+    ROLE.REFEREE_MANAGER,
+  ]),
+  matchController.updateLivestreamUrl
 );
 
 router.delete(
