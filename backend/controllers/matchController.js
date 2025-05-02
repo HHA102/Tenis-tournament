@@ -235,6 +235,152 @@ const matchController = {
       res.status(500).json({ message: error.message });
     }
   },
+  increasePlayerScore: async (req, res) => {
+    try {
+      const { matchId, player } = req.body;
+      const match = await Match.findById(matchId);
+      if (!match) {
+        return res.status(404).json({ message: "Match not found" });
+      }
+
+      const currentGame = match.liveScore.currentGame;
+      const scoringPlayer = currentGame[player];
+      const opponentPlayer =
+        currentGame[player === "player1" ? "player2" : "player1"];
+
+      // Helper function to reset game state
+      const resetGameState = () => {
+        currentGame.player1.score = 0;
+        currentGame.player2.score = 0;
+      };
+
+      // Check who is the winner of the match
+      const checkWinner = (setsResult) => {
+        const player1Sets = setsResult.filter(
+          (set) => set.player1Score > set.player2Score
+        ).length;
+        const player2Sets = setsResult.filter(
+          (set) => set.player2Score > set.player1Score
+        ).length;
+        if (player1Sets > player2Sets) {
+          return match.player1;
+        } else if (player2Sets > player1Sets) {
+          return match.player2;
+        } else {
+          return null;
+        }
+      };
+
+      // Helper function to record set and reset game
+      const recordSetAndReset = () => {
+        match.result.sets.push({
+          player1Score: currentGame.player1.score,
+          player2Score: currentGame.player2.score,
+        });
+        if (match.liveScore.currentSet === match.round) {
+          match.status = MATCH_STATUS.COMPLETED;
+          match.result.winner = checkWinner(match.result.sets);
+        } else {
+          match.liveScore.currentSet++;
+          resetGameState();
+        }
+      };
+
+      // If player has advantage (score 4) and wins the point, they win the game (score 5)
+      if (scoringPlayer.score === 4) {
+        scoringPlayer.score = 5;
+        recordSetAndReset();
+      }
+      // If opponent has advantage (score 4) and player wins, remove opponent's advantage
+      else if (opponentPlayer.score === 4) {
+        opponentPlayer.score = 3;
+      }
+      // If both players are at 40 (score 3), give advantage to scoring player
+      else if (scoringPlayer.score === 3 && opponentPlayer.score === 3) {
+        scoringPlayer.score = 4;
+      }
+      // If player can win the game (score 3 and opponent < 3)
+      else if (scoringPlayer.score === 3 && opponentPlayer.score < 3) {
+        scoringPlayer.score = 5;
+        recordSetAndReset();
+      }
+      // Normal point scoring (0 -> 15 -> 30 -> 40)
+      else if (scoringPlayer.score < 3) {
+        scoringPlayer.score++;
+      }
+
+      await match.save();
+      const matchObj = await matchController.populateMatchInfo(match);
+      res.status(200).json(matchObj);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  },
+  decreasePlayerScore: async (req, res) => {
+    // This is not a recommendation way to update the score, but it's a quick fix for mistakes
+    try {
+      const { matchId, player } = req.body;
+      const match = await Match.findById(matchId);
+      if (!match) {
+        return res.status(404).json({ message: "Match not found" });
+      }
+
+      const currentGame = match.liveScore.currentGame;
+      const scoringPlayer = currentGame[player];
+      const opponentPlayer =
+        currentGame[player === "player1" ? "player2" : "player1"];
+
+      // Helper function to reset game state
+      const resetGameState = () => {
+        currentGame.player1.score = 0;
+        currentGame.player2.score = 0;
+      };
+
+      // Helper function to record set and reset game
+      const recordSetAndReset = () => {
+        match.result.sets.push({
+          player1Score: currentGame.player1.score,
+          player2Score: currentGame.player2.score,
+        });
+        match.liveScore.currentSet++;
+        resetGameState();
+      };
+
+      // If player has score 5 (just won the game), revert to advantage (score 4)
+      if (scoringPlayer.score === 5) {
+        scoringPlayer.score = 4;
+        // Remove the last set from the result since we're undoing the game win
+        match.result.sets.pop();
+        match.liveScore.currentSet--;
+      }
+      // If player has advantage (score 4), revert to deuce (score 3)
+      else if (scoringPlayer.score === 4) {
+        scoringPlayer.score = 3;
+      }
+      // If opponent has advantage (score 4), revert to deuce (score 3)
+      else if (opponentPlayer.score === 4) {
+        opponentPlayer.score = 3;
+      }
+      // If both players are at deuce (score 3), reduce scoring player's score
+      else if (scoringPlayer.score === 3 && opponentPlayer.score === 3) {
+        scoringPlayer.score = 2;
+      }
+      // If player can win the game (score 3 and opponent < 3), revert to normal scoring
+      else if (scoringPlayer.score === 3 && opponentPlayer.score < 3) {
+        scoringPlayer.score = 2;
+      }
+      // Normal point reduction (40 -> 30 -> 15 -> 0)
+      else if (scoringPlayer.score > 0) {
+        scoringPlayer.score--;
+      }
+
+      await match.save();
+      const matchObj = await matchController.populateMatchInfo(match);
+      res.status(200).json(matchObj);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  },
 };
 
 module.exports = matchController;

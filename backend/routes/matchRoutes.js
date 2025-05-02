@@ -43,6 +43,18 @@ router.put(
 );
 
 router.put(
+  "/increase-score",
+  middlewareController.verifyTokenWithCustomRoles([ROLE.REFEREE]),
+  matchController.increasePlayerScore
+);
+
+router.put(
+  "/decrease-score",
+  middlewareController.verifyTokenWithCustomRoles([ROLE.REFEREE]),
+  matchController.decreasePlayerScore
+);
+
+router.put(
   "/:id",
   middlewareController.verifyTokenWithCustomRoles([
     ROLE.ORGANIZER,

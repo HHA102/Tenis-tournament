@@ -4,7 +4,8 @@ const middlewareController = {
   //verifyToken
   verifyToken: (req, res, next) => {
     try {
-      const authHeader = req.headers["authorization"] || req.headers["Authorization"];
+      const authHeader =
+        req.headers["authorization"] || req.headers["Authorization"];
 
       if (!authHeader || !authHeader.startsWith("Bearer ")) {
         return res.status(401).json({ message: "You're not authenticated" });
@@ -17,7 +18,9 @@ const middlewareController = {
           console.error("JWT Verification Error:", err.message);
 
           if (err.name === "TokenExpiredError") {
-            return res.status(401).json({ message: "Token has expired. Please log in again." });
+            return res
+              .status(401)
+              .json({ message: "Token has expired. Please log in again." });
           }
 
           return res.status(403).json({ message: "Token is invalid" });
@@ -25,7 +28,7 @@ const middlewareController = {
 
         req.user = {
           ...user,
-          _id: user.id.toString()
+          _id: user.id.toString(),
         }; // Attach user data to request
         next();
       });
@@ -58,18 +61,25 @@ const middlewareController = {
       if (req.user.role && req.user.role.includes("organizer")) {
         next();
       } else {
-        res.status(403).json({ error: "Access denied. Only organizers can perform this action." });
+        res.status(403).json({
+          error: "Access denied. Only organizers can perform this action.",
+        });
       }
     });
   },
   verifyTokenWithCustomRoles: (requiredRoles) => (req, res, next) => {
     middlewareController.verifyToken(req, res, () => {
-      if (req.user.role && requiredRoles.some((role) => req.user.role.includes(role))) {
+      if (
+        req.user.role &&
+        requiredRoles.some((role) => req.user.role.includes(role))
+      ) {
         next();
       } else {
-        res.status(403).json({ error: "Access denied. You do not have the required roles." });
+        res.status(403).json({
+          error: "Access denied. You do not have the required roles.",
+        });
       }
-    })
+    });
   },
 };
 

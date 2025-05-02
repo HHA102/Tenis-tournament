@@ -22,8 +22,12 @@ const MatchSchema = new Schema({
   result: {
     sets: [
       {
-        player1Score: Number,
-        player2Score: Number,
+        games: [
+          {
+            player1Score: Number,
+            player2Score: Number,
+          },
+        ],
       },
     ],
     winner: { type: Schema.Types.ObjectId, ref: "User" },
@@ -33,11 +37,9 @@ const MatchSchema = new Schema({
     currentGame: {
       player1: {
         score: Number,
-        isAdvantage: { type: Boolean, default: false },
       },
       player2: {
         score: Number,
-        isAdvantage: { type: Boolean, default: false },
       },
     },
     isLive: { type: Boolean, default: false },

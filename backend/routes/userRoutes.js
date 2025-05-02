@@ -1,12 +1,25 @@
 const middlewareController = require("../controllers/middlewareController");
 const userController = require("../controllers/userController");
-const upload = require("../config/multer");
 const express = require("express");
 
 const router = express.Router();
 
 //GET ALL USERS
 router.get("/", middlewareController.verifyToken, userController.getAllUsers);
+
+//GET USER DETAIL BY TOKEN
+router.get(
+  "/me",
+  middlewareController.verifyToken,
+  userController.getUserByToken
+);
+
+//GET USER BY ID
+router.get(
+  "/:id",
+  middlewareController.verifyToken,
+  userController.getUserById
+);
 
 //DELETE USER
 router.delete(
@@ -20,6 +33,27 @@ router.put(
   "/update",
   middlewareController.verifyToken,
   userController.updatePersonalInfo
+);
+
+//UPDATE USER INFO BY ADMIN
+router.put(
+  "/admin-update/:id",
+  middlewareController.verifyTokenAndAdminAuth,
+  userController.updateProfileByAdmin
+);
+
+//DEACTIVATE USER
+router.put(
+  "/deactivate/:id",
+  middlewareController.verifyTokenAndAdminAuth,
+  userController.deactivateUser
+);
+
+//ACTIVATE USER
+router.put(
+  "/activate/:id",
+  middlewareController.verifyTokenAndAdminAuth,
+  userController.activateUser
 );
 
 //UPDATE USER EMAIL
@@ -43,19 +77,18 @@ router.put(
   userController.updateFCMToken
 );
 
-//GET USER DETAIL BY TOKEN
-router.get(
-  "/me",
-  middlewareController.verifyToken,
-  userController.getUserByToken
-);
-
 //UPDATE USER PROFILE PICTURE
 router.put(
   "/update/profilePicture",
   middlewareController.verifyToken,
-  upload.single("file"),
   userController.updateProfilePicture
+);
+
+//UPDATE USER PROFILE PICTURE BY ADMIN
+router.put(
+  "/admin-update/profilePicture/:id",
+  middlewareController.verifyTokenAndAdminAuth,
+  userController.updateProfilePictureByAdmin
 );
 
 router.get(

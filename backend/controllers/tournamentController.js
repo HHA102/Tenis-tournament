@@ -2,6 +2,7 @@ const { ROLE, REGISTRATION_STATUS, THEME_BG } = require("../constants");
 const Match = require("../models/Match");
 const Notification = require("../models/Notification");
 const Tournament = require("../models/Tournament");
+const Sponsor = require("../models/Sponsorship");
 const User = require("../models/User");
 const { sendNotification } = require("../services/notificationService");
 const { transformUserForResponse } = require("../services/userService");
@@ -277,6 +278,39 @@ const tournamentController = {
       });
     }
   },
+  sponsorTournament: async (req, res) => {
+    try {
+      const { tournamentId, sponsorId, amount, name, logo } = req.body;
+      const tournament = await Tournament.findById(tournamentId);
+      if (!tournament) {
+        return res.status(404).json({ error: "Tournament not found" });
+      }
+      if (tournament.sponsors.some((s) => s.toString() === sponsorId)) {
+        return res
+          .status(400)
+          .json({ error: "Tournament already sponsored by this sponsor" });
+      }
+
+      const newSponsor = new Sponsor({
+        sponsorId,
+        name,
+        logo,
+        amount,
+      });
+
+      await newSponsor.save();
+      tournament.sponsors.push(newSponsor._id);
+      await tournament.save();
+
+      res.status(200).json({ message: "Tournament sponsored successfully" });
+    } catch (error) {
+      console.error("Error sponsoring tournament:", error);
+      res.status(500).json({
+        error: "Failed to sponsor tournament",
+        details: error.message,
+      });
+    }
+  },
   getTournamentById: async (req, res) => {
     try {
       const tournament = await Tournament.findById(req.params.id);
@@ -413,6 +447,15 @@ const tournamentController = {
         ...tournament.toObject(),
         organizer: organizer ? transformUserForResponse(organizer) : null, // Transform organizer if it exists
       };
+
+      const sponsors = tournament.sponsors;
+      const transformedSponsors = await Promise.all(
+        sponsors.map(async (sponsor) => {
+          const sponsorObj = await Sponsor.findById(sponsor);
+          return sponsorObj;
+        })
+      );
+      tournament.sponsors = transformedSponsors;
 
       const participants = tournament.participants;
       for (const participant of participants) {

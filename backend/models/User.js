@@ -9,7 +9,6 @@ const UserSchema = new Schema(
       required: true,
       unique: true,
     },
-
     email: {
       type: String,
       required: true,
@@ -52,6 +51,7 @@ const UserSchema = new Schema(
     createdAt: { type: Date, default: Date.now },
     fcmTokens: [String],
     profilePicture: String,
+    isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
 );

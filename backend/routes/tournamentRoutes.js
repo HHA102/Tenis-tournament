@@ -78,4 +78,10 @@ router.get(
   tournamentController.getTournamentApprovedPlayers
 );
 
+router.post(
+  "/sponsors",
+  middlewareController.verifyTokenWithCustomRoles([ROLE.SPONSOR]),
+  tournamentController.sponsorTournament
+);
+
 module.exports = router;
