@@ -5,6 +5,7 @@ const SponsorSchema = new mongoose.Schema({
   name: { type: String, required: true },
   logo: { type: String, required: false },
   amount: { type: Number, required: true },
+  note: String,
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

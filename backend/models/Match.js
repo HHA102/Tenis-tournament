@@ -22,12 +22,15 @@ const MatchSchema = new Schema({
   result: {
     sets: [
       {
-        games: [
-          {
-            player1Score: Number,
-            player2Score: Number,
-          },
-        ],
+        setNumber: { type: Number, required: true, default: 1 },
+        player1Games: { type: Number, required: true, default: 0 },
+        player2Games: { type: Number, required: true, default: 0 },
+        setWinner: { type: Schema.Types.ObjectId, ref: "User" },
+        isTieBreak: { type: Boolean, default: false },
+        tieBreakScore: {
+          player1: { type: Number, default: 0 },
+          player2: { type: Number, default: 0 },
+        },
       },
     ],
     winner: { type: Schema.Types.ObjectId, ref: "User" },
@@ -41,6 +44,7 @@ const MatchSchema = new Schema({
       player2: {
         score: Number,
       },
+      isTieBreak: { type: Boolean, default: false },
     },
     isLive: { type: Boolean, default: false },
   },

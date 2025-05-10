@@ -280,7 +280,7 @@ const tournamentController = {
   },
   sponsorTournament: async (req, res) => {
     try {
-      const { tournamentId, sponsorId, amount, name, logo } = req.body;
+      const { tournamentId, sponsorId, amount, name, logo, note } = req.body;
       const tournament = await Tournament.findById(tournamentId);
       if (!tournament) {
         return res.status(404).json({ error: "Tournament not found" });
@@ -296,6 +296,7 @@ const tournamentController = {
         name,
         logo,
         amount,
+        note,
       });
 
       await newSponsor.save();

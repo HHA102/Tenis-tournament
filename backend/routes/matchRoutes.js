@@ -91,7 +91,10 @@ router.post(
 
 router.post(
   "/nominate-featured",
-  middlewareController.verifyTokenAndOrganizerAuth,
+  middlewareController.verifyTokenWithCustomRoles([
+    ROLE.ORGANIZER,
+    ROLE.REFEREE_MANAGER,
+  ]),
   matchController.nominateFeaturedMatch
 );
 
