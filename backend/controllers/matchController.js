@@ -265,14 +265,21 @@ const matchController = {
       // Check who is the winner of the match
       const checkWinner = (setsResult) => {
         const player1Sets = setsResult.filter(
-          (set) => set.setWinner === match.player1
+          (set) =>
+            set.setWinner &&
+            set.setWinner.toString() === match.player1.toString()
         ).length;
         const player2Sets = setsResult.filter(
-          (set) => set.setWinner === match.player2
+          (set) =>
+            set.setWinner &&
+            set.setWinner.toString() === match.player2.toString()
         ).length;
-        if (player1Sets > player2Sets) {
+
+        const requiredSets = match.round === 3 ? 2 : 3;
+
+        if (player1Sets >= requiredSets) {
           return match.player1;
-        } else if (player2Sets > player1Sets) {
+        } else if (player2Sets >= requiredSets) {
           return match.player2;
         } else {
           return null;
@@ -292,41 +299,34 @@ const matchController = {
               player1: { score: 0 },
               player2: { score: 0 },
             };
-            if (currentSetResult.player1Games === 6) {
-              // end up this set
-              currentSetResult.setWinner = match.player1;
-              if (match.liveScore.currentSet === match.round) {
-                match.status = MATCH_STATUS.COMPLETED;
-                match.result.winner = checkWinner(match.result.sets);
-              } else {
-                match.result.sets.push({
-                  setNumber: currentSet + 1,
-                  player1Games: 0,
-                  player2Games: 0,
-                });
-                match.liveScore.currentSet++;
-              }
-            }
           } else {
             currentSetResult.player2Games++;
             match.liveScore.currentGame = {
               player1: { score: 0 },
               player2: { score: 0 },
             };
-            if (currentSetResult.player2Games === 6) {
-              // end up this set
-              currentSetResult.setWinner = match.player2;
-              if (match.liveScore.currentSet === match.round) {
-                match.status = MATCH_STATUS.COMPLETED;
-                match.result.winner = checkWinner(match.result.sets);
-              } else {
-                match.result.sets.push({
-                  setNumber: currentSet + 1,
-                  player1Games: 0,
-                  player2Games: 0,
-                });
-                match.liveScore.currentSet++;
-              }
+          }
+          if (
+            currentSetResult.player1Games === 6 ||
+            currentSetResult.player2Games === 6
+          ) {
+            // end up this set
+            currentSetResult.setWinner =
+              currentSetResult.player1Games === 6
+                ? match.player1
+                : match.player2;
+            const winner = checkWinner(match.result.sets);
+
+            if (winner) {
+              match.status = MATCH_STATUS.COMPLETED;
+              match.result.winner = winner;
+            } else {
+              match.result.sets.push({
+                setNumber: currentSet + 1,
+                player1Games: 0,
+                player2Games: 0,
+              });
+              match.liveScore.currentSet++;
             }
           }
         }
@@ -363,7 +363,7 @@ const matchController = {
     }
   },
   decreasePlayerScore: async (req, res) => {
-    // This is not a recommendation way to update the score, but it's a quick fix for mistakes
+    // This is a quick fix for point increment mistakes
     try {
       const { matchId, player } = req.body;
       const match = await Match.findById(matchId);
@@ -376,28 +376,33 @@ const matchController = {
       const opponentPlayer =
         currentGame[player === "player1" ? "player2" : "player1"];
 
-      // Helper function to reset game state
-      const resetGameState = () => {
-        currentGame.player1.score = 0;
-        currentGame.player2.score = 0;
-      };
-
-      // Helper function to record set and reset game
-      const recordSetAndReset = () => {
-        match.result.sets.push({
-          player1Score: currentGame.player1.score,
-          player2Score: currentGame.player2.score,
-        });
-        match.liveScore.currentSet++;
-        resetGameState();
-      };
-
       // If player has score 5 (just won the game), revert to advantage (score 4)
       if (scoringPlayer.score === 5) {
         scoringPlayer.score = 4;
         // Remove the last set from the result since we're undoing the game win
-        match.result.sets.pop();
-        match.liveScore.currentSet--;
+        const currentSet = match.liveScore.currentSet;
+        const currentSetResult = match.result.sets.find(
+          (set) => set.setNumber === currentSet
+        );
+        if (currentSetResult) {
+          if (player === "player1") {
+            currentSetResult.player1Games--;
+          } else {
+            currentSetResult.player2Games--;
+          }
+          // If we're undoing the last game of a set
+          if (
+            currentSetResult.player1Games === 5 ||
+            currentSetResult.player2Games === 5
+          ) {
+            currentSetResult.setWinner = null;
+            // If this was the last set, remove it
+            if (match.result.sets.length > 1) {
+              match.result.sets.pop();
+              match.liveScore.currentSet--;
+            }
+          }
+        }
       }
       // If player has advantage (score 4), revert to deuce (score 3)
       else if (scoringPlayer.score === 4) {
