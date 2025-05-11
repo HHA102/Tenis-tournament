@@ -498,7 +498,6 @@ const tournamentController = {
       for (const match of matches) {
         const player1 = await User.findById(match.player1);
         const player2 = await User.findById(match.player2);
-        const referee = await User.findById(match.referee);
 
         const transformedMatch = match.toObject();
         transformedMatch.player1 = player1
@@ -506,9 +505,6 @@ const tournamentController = {
           : null;
         transformedMatch.player2 = player2
           ? transformUserForResponse(player2)
-          : null;
-        transformedMatch.referee = referee
-          ? transformUserForResponse(referee)
           : null;
         transformedMatches.push(transformedMatch);
       }
