@@ -18,8 +18,8 @@ const authController = {
           fullName: req.body.fullName,
           phoneNumber: req.body.phoneNumber,
           dateOfBirth: req.body.dateOfBirth,
-          address: req.body.address
-        }
+          address: req.body.address,
+        },
       });
       //save to database
       const user = await newUser.save();
@@ -73,17 +73,33 @@ const authController = {
         return res.status(400).json("Wrong username!");
       }
 
-      const valiPassword = await bcrypt.compare(req.body.password, user.password);
+      const valiPassword = await bcrypt.compare(
+        req.body.password,
+        user.password
+      );
       if (!valiPassword) {
         return res.status(400).json("Wrong password!");
+      }
+
+      if (!user.isActive) {
+        return res
+          .status(400)
+          .json(
+            "Your account is deactivated! Please contact the administrator."
+          );
       }
 
       const accessToken = authController.generateAccessToken(user);
       const refreshToken = authController.generateRefreshToken(user);
 
-      user.refreshTokens = user.refreshTokens.filter(token => token.expiresAt > new Date());
+      user.refreshTokens = user.refreshTokens.filter(
+        (token) => token.expiresAt > new Date()
+      );
 
-      user.refreshTokens.push({ token: refreshToken, expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) });
+      user.refreshTokens.push({
+        token: refreshToken,
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      });
       await user.save();
 
       res.cookie("refreshToken", refreshToken, {
@@ -96,9 +112,8 @@ const authController = {
 
       const userData = user.toObject();
       delete userData?.password;
-      delete userData?.refreshTokens
+      delete userData?.refreshTokens;
       res.status(200).json({ ...userData, accessToken });
-
     } catch (err) {
       console.error("Login Error:", err);
       res.status(500).json(err);
@@ -118,32 +133,42 @@ const authController = {
         return res.status(403).json({ message: "Refresh token is not valid." });
       }
 
-      jwt.verify(refreshToken, process.env.JWT_REFRESH_KEY, async (err, decoded) => {
-        if (err) {
-          return res.status(403).json({ message: "Invalid or expired refresh token." });
+      jwt.verify(
+        refreshToken,
+        process.env.JWT_REFRESH_KEY,
+        async (err, decoded) => {
+          if (err) {
+            return res
+              .status(403)
+              .json({ message: "Invalid or expired refresh token." });
+          }
+          user.refreshTokens = user.refreshTokens.filter(
+            (t) => t.token !== refreshToken
+          );
+
+          // Generate new access and refresh tokens
+          const newAccessToken = authController.generateAccessToken(user);
+          const newRefreshToken = authController.generateRefreshToken(user);
+
+          // Add new refresh token
+          user.refreshTokens.push({
+            token: newRefreshToken,
+            expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          });
+          await user.save();
+
+          // Set new refresh token in cookies
+          res.cookie("refreshToken", newRefreshToken, {
+            httpOnly: true,
+            secure: false,
+            path: "/",
+            sameSite: "lax",
+            maxAge: 30 * 24 * 60 * 60 * 1000, // 30d
+          });
+
+          res.status(200).json({ accessToken: newAccessToken });
         }
-        user.refreshTokens = user.refreshTokens.filter(t => t.token !== refreshToken);
-
-        // Generate new access and refresh tokens
-        const newAccessToken = authController.generateAccessToken(user);
-        const newRefreshToken = authController.generateRefreshToken(user);
-
-        // Add new refresh token
-        user.refreshTokens.push({ token: newRefreshToken, expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) });
-        await user.save();
-
-        // Set new refresh token in cookies
-        res.cookie("refreshToken", newRefreshToken, {
-          httpOnly: true,
-          secure: false,
-          path: "/",
-          sameSite: "lax",
-          maxAge: 30 * 24 * 60 * 60 * 1000, // 30d
-        });
-
-        res.status(200).json({ accessToken: newAccessToken });
-      });
-
+      );
     } catch (error) {
       console.error("Refresh Token Error:", error);
       res.status(500).json({ message: "Internal server error." });
@@ -160,7 +185,9 @@ const authController = {
         return res.status(403).json({ message: "Invalid refresh token." });
       }
 
-      user.refreshTokens = user.refreshTokens.filter(t => t.token !== refreshToken);
+      user.refreshTokens = user.refreshTokens.filter(
+        (t) => t.token !== refreshToken
+      );
       await user.save();
 
       // Clear refresh token cookie
@@ -197,7 +224,7 @@ const authController = {
     } catch (err) {
       res.status(500).json(err);
     }
-  }
-}
+  },
+};
 
 module.exports = authController;
