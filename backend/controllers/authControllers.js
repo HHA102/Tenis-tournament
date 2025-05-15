@@ -104,9 +104,9 @@ const authController = {
 
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
-        secure: false,
+        secure: true,
         path: "/",
-        sameSite: "lax",
+        sameSite: "none",
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30d
       });
 
@@ -160,9 +160,9 @@ const authController = {
           // Set new refresh token in cookies
           res.cookie("refreshToken", newRefreshToken, {
             httpOnly: true,
-            secure: false,
+            secure: true,
             path: "/",
-            sameSite: "lax",
+            sameSite: "none",
             maxAge: 30 * 24 * 60 * 60 * 1000, // 30d
           });
 
@@ -193,9 +193,9 @@ const authController = {
       // Clear refresh token cookie
       res.clearCookie("refreshToken", {
         httpOnly: true,
-        secure: false,
+        secure: true,
         path: "/",
-        sameSite: "lax",
+        sameSite: "none",
       });
 
       res.status(200).json({ message: "Logged out successfully!" });
